@@ -6,6 +6,7 @@ on:
     tags: "[0-9]*.[0-9]*.[0-9]*"
     paths:
       - "app/**/*"  # only rebuild when app code changes
+      - ".github/workflows/*"
   workflow_dispatch:
 
 jobs:
@@ -69,6 +70,7 @@ jobs:
 
       # Cache import for faster builds
       - name: Restore Docker Buildx cache
+        working-directory: /app/
         uses: docker/build-push-action@v6
         with:
           builder: default
@@ -85,6 +87,7 @@ jobs:
 
       # Optional: Export cache for next build
       - name: Save Docker Buildx cache
+        working-directory: /app/
         uses: docker/build-push-action@v6
         with:
           builder: default
