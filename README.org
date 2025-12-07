@@ -1,4 +1,4 @@
-#+TITLE: Cloud-Native Full DevOps Cycle Project
+#+TITLE: Cloud-Native Movie Review Platform (Full DevOps Cycle Project)
 #+AUTHOR: Twilight4
 
 * Table of Contents :toc:
@@ -6,7 +6,7 @@
   - [[#full-project-folder-structure][Full Project Folder Structure]]
   - [[#full-architecture-diagram][Full Architecture Diagram]]
   - [[#skills-demonstrated][Skills Demonstrated]]
-- [[#how-to-deploy][How to Deploy]]
+- [[#steps-to-deploy][Steps to Deploy]]
   - [[#1-provision-cloud-infrastructure][1. Provision Cloud Infrastructure]]
   - [[#2-apply-helm-chart][2. Apply Helm Chart]]
   - [[#3-setup-gitops-argocd][3. Setup GitOps (ArgoCD)]]
@@ -61,7 +61,7 @@ full-devops-cycle-project/
                                                 │ git push
                                                 ▼
                                       ┌────────────────────┐
-                                      │   GitHub Repo      │
+                                      │     GitHub Repo    │
                                       └─────────┬──────────┘
                                                 │ triggers
                                                 ▼
@@ -130,7 +130,7 @@ full-devops-cycle-project/
 *** Containerization
 - Dockerfile (multi-stage)
 - Docker Compose for local development
-- Image optimization and vulnerability scanning
+- Image optimization
 
 *** Kubernetes
 - Deployments, Services, Ingress
@@ -139,8 +139,8 @@ full-devops-cycle-project/
 - Namespaces and environment separation
 - Helm chart packaging and templating
 
-*** Cloud Infrastructure (GCP + Terraform)
-Using Terraform to provision:
+*** Cloud Infrastructure
+Using Terraform to provision GCP infrastructure:
 - GKE cluster
 - Cloud SQL PostgreSQL
 - VPC, subnets, and firewall rules
@@ -167,7 +167,7 @@ Using Terraform to provision:
 - Terraform IAM least-privilege model
 - Kubernetes Secret Management
 
-* How to Deploy
+* Steps to Deploy
 ** 1. Provision Cloud Infrastructure
 
 ** 2. Apply Helm Chart
