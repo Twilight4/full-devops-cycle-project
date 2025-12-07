@@ -1,5 +1,11 @@
 version: "3"
 
+vars:
+  DATABASE_URL: "postgres://postgres:foobarbaz@localhost:5432/postgres"
+  IMAGE_NAME: api-node
+  IMAGE_REPO: ghcr.io/twilight4/devops-api-node
+  IMAGE_TAG: foobarbaz
+
 tasks:
   generate-version-tag:
     cmds:
@@ -58,3 +64,13 @@ tasks:
           IDENTIFIER_COMMENT: "# PRODUCTION_IMAGE_TAG"
           STARTING_PATH:
             sh: git rev-parse --show-toplevel
+
+  build-container-image:
+    desc: Build container image
+    cmds:
+      - docker build -t ${{.IMAGE_REPO}}/{{.IMAGE_NAME}}:{{.IMAGE_TAG}} .
+
+  push-container-image:
+    desc: Push container image
+    cmds:
+      - docker push ${{.IMAGE_REPO}}/${{.IMAGE_NAME}}:{{.IMAGE_TAG}}
