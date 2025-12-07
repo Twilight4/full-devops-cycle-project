@@ -29,13 +29,19 @@ This project demonstrates a full production-grade DevOps setup using modern tool
 #+begin_src shell
 full-devops-cycle-project/
 ├── app/                → Application source code
-│   ├── src/
 │   ├── tests/
+│   │   └── movies.test.js
+│   ├── src/
+│   │    ├── routes/
+│   │    │   └── movies.js
+│   │    ├── server.js
+│   │    └── app.js
 │   ├── package.json
 │   └── README.md
-│
+│ 
 ├── docker/             → Dockerfile + Compose
 │   └── Dockerfile
+│   └── docker-compose.yaml (for local dev)
 │
 ├── k8s/                → Deployment manifests
 │

@@ -3,8 +3,8 @@ const router = express.Router();
 
 // In-memory storage (replace with CloudSQL later)
 let movies = [
-  { id: 1, title: "Inception", rating: 5 },
-  { id: 2, title: "Interstellar", rating: 4 }
+  { id: 1, title: "American Psycho", rating: 10 },
+  { id: 2, title: "Interstellar", rating: 2 }
 ];
 
 router.get("/", (req, res) => {
