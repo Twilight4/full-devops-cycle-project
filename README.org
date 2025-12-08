@@ -67,7 +67,21 @@ full-devops-cycle-project/
 │       ├── cosmos-service.yaml
 │       └── configmap.yaml
 │
-├── helm/               → Helm chart for deployment
+├── helm/charts/               → Helm chart for deployment
+│   └── movie-review/
+│       ├── templates/
+│       │   ├── movie-api-service.yaml
+│       │   ├── movie-api-hpa.yaml
+│       │   ├── movie-api-deployment.yaml
+│       │   ├── kustomization.yaml
+│       │   ├── ingress.yaml
+│       │   ├── cosmos-service.yaml
+│       │   ├── secret.yaml
+│       │   ├── netpol.yaml
+│       │   ├── ingress-nginx-namespace.yaml
+│       │   └── configmap.yaml
+│       ├── values.yaml
+│       └── Chart.yaml
 │
 ├── terraform/          → Infrastructure as Code (GCP)
 │
@@ -263,13 +277,13 @@ kubectl delete namespace dev
 **** Minikube via helm
 #+begin_src shell
 # Install
-helm install my-micro charts/microservices -n demo --create-namespace
+helm install movie-review-chart helm/charts/movie-review
 
 # Upgrade
-helm upgrade my-micro charts/microservices -n demo
+helm upgrade movie-review-chart helm/charts/movie-review
 
 # Uninstall
-helm uninstall my-micro -n demo
+helm uninstall movie-review-chart
 #+end_src
 
 **** Test health endpoint
@@ -316,7 +330,12 @@ Kubernetes:
 - [X] Implement Kustomize overlays
 - [ ] Implement CosmosDB integration for Azure (ConfigMap, Secret, CosmosDB ExternalName Service)
 - [ ] Implement network policy for CosmosDB database
+- [ ] Implement PersistentVolumeClaims to CosmosDB
 - [ ] Implement helm charts packaging and templating
+- [ ] After CosmosDB creation Success:
+  + correct the 3 manifests (cosmos-service.yaml, secret.yaml, netpo.yaml) and test
+  + add the 3 manifests (cosmos-service.yaml, secret.yaml, netpo.yaml) to helm chart
+  + implement cosmosDB integration to node app
 
 Terraform:
 - [ ] GKE cluster
