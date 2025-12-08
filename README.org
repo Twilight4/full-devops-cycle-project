@@ -187,7 +187,7 @@ kubectl apply -f deploy/
 kubectl delete -f deploy/
 #+end_src
 
-Test helath endpoint:
+Test health endpoint:
 #+begin_src shell
 # Port-forward the service
 kubectl port-forward pod/<POD_NAME> 3000:80 
