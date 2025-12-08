@@ -7,10 +7,11 @@
   - [[#full-architecture-diagram][Full Architecture Diagram]]
   - [[#project-scope--technologies-used][Project Scope / Technologies Used]]
 - [[#steps-to-deploy-wip][Steps to Deploy (WIP)]]
-  - [[#1-provision-cloud-infrastructure][1. Provision Cloud Infrastructure]]
-  - [[#2-apply-helm-chart--kubernetes-locally][2. Apply Helm Chart / Kubernetes locally]]
+  - [[#prerequisites][Prerequisites]]
+  - [[#1-deploy-cloud-infrastructure][1. Deploy Cloud Infrastructure]]
+  - [[#2-deploy-kubernetes-cluster][2. Deploy Kubernetes Cluster]]
   - [[#3-setup-gitops-argocd][3. Setup GitOps (ArgoCD)]]
-  - [[#roadmap-wip][Roadmap (WIP)]]
+- [[#roadmap-wip][Roadmap (WIP)]]
 
 * Overview
 This project outlines every stage of the DevOps lifecycle, the tools and how the pieces connect. Everything fully automated end-to-end.
@@ -204,10 +205,45 @@ Using Terraform to provision GCP infrastructure:
 - Terraform IAM least-privilege model
 
 * Steps to Deploy (WIP)
-** 1. Provision Cloud Infrastructure
+** Prerequisites
+- git
+- docker
+- kubectl
+- minikube or kind
+- helm (v3)
+- terraform
+- Azure subscription (Owner or Contributor role)
+- az (Azure CLI)
 
-** 2. Apply Helm Chart / Kubernetes locally
-*** Test locally
+** 1. Deploy Cloud Infrastructure
+*** Authenticate with Azure
+*** Deploy the infrastructure
+#+begin_src shell
+# Change directory
+cd terraform/
+
+# Initialize terraform
+terraform init
+
+# Review the planned configuration
+terraform plan -out plan.tfplan
+
+# Apply the terraform configuration
+terraform apply plan.tfplan
+#+end_src
+
+*** Verify deployment
+**** Using Azure Portal
+**** Using Azure CLI
+
+*** Clean up
+#+begin_src shell
+# Remove all terraform resources and avoid charges
+terraform destroy -var-file=dev.tfvars
+#+end_src
+
+** 2. Deploy Kubernetes Cluster
+*** Test Locally
 **** Minikube via kubectl
 #+begin_src shell
 # Test locally with minikube
@@ -224,7 +260,19 @@ kubectl delete -k k8s/overlays/dev
 kubectl delete namespace dev
 #+end_src
 
-Test health endpoint:
+**** Minikube via helm
+#+begin_src shell
+# Install
+helm install my-micro charts/microservices -n demo --create-namespace
+
+# Upgrade
+helm upgrade my-micro charts/microservices -n demo
+
+# Uninstall
+helm uninstall my-micro -n demo
+#+end_src
+
+**** Test health endpoint
 #+begin_src shell
 # Port-forward the service
 kubectl port-forward pod/<POD_NAME> 3000:80 
@@ -233,15 +281,16 @@ xh localhost:3000/health
 # OR check from inside of the container
 kubectl exec -it <POD_NAME> -- netstat -tlnp           # to check which port the service is running on
 kubectl exec -it <POD_NAME> -- wget -qO- http://localhost:3000/health
+
+# Expected output: {"status":"ok"}
 #+end_src
 
-**** Minikube via helm
-
-*** Deploy in Azure
+*** Azure Cloud
 
 ** 3. Setup GitOps (ArgoCD)
 
-** Roadmap (WIP)
+
+* Roadmap (WIP)
 Docker application:
 - [X] Write demo movie-review app in NodeJS using Express API
 - [X] Implement app logic
@@ -259,12 +308,12 @@ CI/CD:
 Kubernetes:
 - [X] Create necessary manifest files (deployment, service, ingress)
 - [X] Implement Horizontal Pod Autoscaler for movie-api deployment
-- [ ] Namespaces and environment separation (Dev → debug mode, Staging → test mode)
+- [X] Namespaces and environment separation (Dev → debug mode, Staging → test mode)
   + =namePrefix: dev-= for dev overlay
   + namespace overrides
   + patchesStrategicMerge
   + image overrides
-- [ ] Implement Kustomize overlays
+- [X] Implement Kustomize overlays
 - [ ] Implement CosmosDB integration for Azure (ConfigMap, Secret, CosmosDB ExternalName Service)
 - [ ] Implement network policy for CosmosDB database
 - [ ] Implement helm charts packaging and templating
