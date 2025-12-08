@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-api-deployment
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: movie-api
+          env:
+            - name: NODE_ENV
+              value: development
+            - name: LOG_LEVEL
+              value: debug

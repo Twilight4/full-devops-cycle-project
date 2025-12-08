@@ -5,11 +5,12 @@
 - [[#overview][Overview]]
   - [[#full-project-directory-structure][Full Project Directory Structure]]
   - [[#full-architecture-diagram][Full Architecture Diagram]]
-  - [[#technologies-used][Technologies Used]]
+  - [[#project-scope--technologies-used][Project Scope / Technologies Used]]
 - [[#steps-to-deploy-wip][Steps to Deploy (WIP)]]
   - [[#1-provision-cloud-infrastructure][1. Provision Cloud Infrastructure]]
-  - [[#2-apply-helm-chart][2. Apply Helm Chart]]
+  - [[#2-apply-helm-chart--kubernetes-locally][2. Apply Helm Chart / Kubernetes locally]]
   - [[#3-setup-gitops-argocd][3. Setup GitOps (ArgoCD)]]
+  - [[#roadmap-wip][Roadmap (WIP)]]
 
 * Overview
 This project outlines every stage of the DevOps lifecycle, the tools and how the pieces connect. Everything fully automated end-to-end.
@@ -40,6 +41,26 @@ full-devops-cycle-project/
 │   └── README.md
 │
 ├── k8s/                → Deployment manifests
+│   ├── overlays
+│   │   ├── staging
+│   │   │   ├── patch-deployment.yaml
+│   │   │   ├── patch-configmap.yaml
+│   │   │   └── kustomization.yaml
+│   │   └── dev
+│   │       ├── patch-deployment.yaml
+│   │       ├── patch-configmap.yaml
+│   │       └── kustomization.yaml
+│   └── base
+│       ├── secret.yaml
+│       ├── netpol.yaml
+│       ├── movie-api-service.yaml
+│       ├── movie-api-hpa.yaml
+│       ├── movie-api-deployment.yaml
+│       ├── kustomization.yaml
+│       ├── ingress.yaml
+│       ├── ingress-nginx-namespace.yaml
+│       ├── cosmos-service.yaml
+│       └── configmap.yaml
 │
 ├── helm/               → Helm chart for deployment
 │
@@ -131,7 +152,7 @@ full-devops-cycle-project/
 
 #+end_src
 
-** Technologies Used
+** Project Scope / Technologies Used
 *** Containerization
 - Dockerfile
 - Image optimization
@@ -141,6 +162,9 @@ full-devops-cycle-project/
 - ConfigMaps and Secrets
 - Horizontal Pod Autoscaler (HPA)
 - Namespaces and environment separation
+- Network policy
+- Liveness/readiness probes
+- Kustomize overlays
 - Helm chart packaging and templating
 
 *** Cloud Infrastructure
@@ -168,23 +192,31 @@ Using Terraform to provision GCP infrastructure:
 - Grafana: dashboards
 
 *** Security
-- Terraform IAM least-privilege model
+- Kubernetes network policy rules:
+  + Allow traffic only from the Ingress Controller
+  + Deny ALL other internal pod traffic
+  + Allow outbound internet (API needs Cosmos DB)
 - Kubernetes Secret Management
+- Terraform IAM least-privilege model
 
 * Steps to Deploy (WIP)
 ** 1. Provision Cloud Infrastructure
 
-** 2. Apply Helm Chart
+** 2. Apply Helm Chart / Kubernetes locally
+*** Test locally
+**** Minikube via kubectl
 #+begin_src shell
 # Test locally with minikube
 minikube start
 minikube addons enable ingress
 
-# Apply manifests
-kubectl apply -f deploy/
+# Apply kustomize for dev OR staging
+kubectl apply -k k8s/overlays/dev       # k8s/overlays/staging for staging overlay
 
-# Uninstall manifests
-kubectl delete -f deploy/
+# Uninstall overlay manifests
+kubectl delete -k k8s/overlays/dev
+# OR just delete entire dev namespace
+kubectl delete namespace dev
 #+end_src
 
 Test health endpoint:
@@ -198,6 +230,51 @@ kubectl exec -it <POD_NAME> -- netstat -tlnp           # to check which port the
 kubectl exec -it <POD_NAME> -- wget -qO- http://localhost:3000/health
 #+end_src
 
+**** Minikube via helm
+
+*** Deploy in Azure
 
 ** 3. Setup GitOps (ArgoCD)
 
+** Roadmap (WIP)
+Docker application:
+- [X] Write Demo movie-review app in NodeJS using Express API
+- [X] Package app in with Dockerfile
+- [X] Image optimization best practices
+- [X] Implement API Endpoints (/health, /movies)
+- [ ] Add Azure CosmosDB integration (env vars, CRUD, routes)
+
+CI/CD:
+- [X] Generating image tag
+- [X] Building and pushing image to GHCR for multi-architecture
+- [ ] Update staging/production tags for push to main or release tag
+- [ ] Create Pull Request with image tag changes
+
+Kubernetes:
+- [X] Create necessary manifest files (deployment, service, ingress)
+- [X] Implement Horizontal Pod Autoscaler for movie-api deployment
+- [ ] Namespaces and environment separation (Dev → debug mode, Staging → test mode)
+  + =namePrefix: dev-= for dev overlay
+  + namespace overrides
+  + patchesStrategicMerge
+  + image overrides
+- [ ] Implement CosmosDB integration for Azure (ConfigMap, Secret, CosmosDB ExternalName Service)
+- [ ] Implement network policy for CosmosDB database
+- [ ] Implement Kustomize overlays
+- [ ] Implement helm charts packaging and templating
+
+Terraform:
+- [ ] GKE cluster
+- [ ] Cloud SQL PostgreSQL
+- [ ] VPC, subnets, and firewall rules
+- [ ] Artifact Registry (GCR)
+- [ ] IAM roles and service accounts
+- [ ] Cloud Storage buckets
+
+GitOps:
+- [ ] Automated Kubernetes deployments with ArgoCD
+- [ ] Declarative Helm charts
+- [ ] Git-driven versioning and rollbacks 
+
+Grafana, Prometheus:
+- [ ] 
