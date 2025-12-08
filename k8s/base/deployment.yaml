@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: twilight4/api-node:0.0.1-20-g075a4c2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "300Mi"
+          limits:
+            cpu: "500m"
+            memory: "400Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: ClusterIP
+  selector:
+    dem: pods
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+

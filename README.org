@@ -133,7 +133,7 @@ full-devops-cycle-project/
 
 ** Technologies Used
 *** Containerization
-- Dockerfile (multi-stage)
+- Dockerfile
 - Image optimization
 
 *** Kubernetes
@@ -175,6 +175,20 @@ Using Terraform to provision GCP infrastructure:
 ** 1. Provision Cloud Infrastructure
 
 ** 2. Apply Helm Chart
+#+begin_src shell
+# Test locally with minikube
+minikube start
+minikube addons enable ingress
+
+# Apply manifests
+kubectl apply -f deploy/
+
+# Uninstall manifests
+kubectl delete -f deploy/
+#+end_src
+
+Test endpoints:
+
 
 ** 3. Setup GitOps (ArgoCD)
 
