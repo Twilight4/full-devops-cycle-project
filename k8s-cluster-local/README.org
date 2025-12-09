@@ -1,0 +1,70 @@
+* Deploy cluster via Minikube/KinD
+** Minikube
+#+begin_src shell
+# Start cluster and enable ingress add-on
+minikube start
+minikube addons enable ingress
+#+end_src
+
+** KinD
+#+begin_src shell
+cd deploy-cluster-kind/
+
+# Start cluster
+kind-config.yaml
+go-task kind:01-generate-config
+go-task kind:02-create-cluster
+#+end_src
+
+** Apply manifests
+*** Using kubectl
+#+begin_src shell
+# Apply default env (namespace env equivelent to k8s/base)
+kubectl apply -k k8s/base
+
+# Apply kustomize for dev
+kubectl create namespace dev            # kustomize expects existing 'dev' namespace
+kubectl apply -k k8s/overlays/dev
+
+# Apply kustomize for staging env
+kubectl create namespace dev            # kustomize expects existing staging' namespace
+kubectl apply -k k8s/overlays/dev
+
+# Uninstall overlay manifest for dev env
+kubectl delete -k k8s/overlays/dev
+# OR just delete created entire namespaces
+kubectl delete namespace dev
+kubectl delete namespace ingress-nginx
+#+end_src
+
+*** Using helm
+#+begin_src shell
+# Install - default env (namespace env equivelent to k8s/base)
+helm install movie-review-chart helm/charts/movie-review
+
+# Install - dev env
+helm install movie-review-chart helm/charts/movie-review -f helm/charts/movie-review/values-dev.yaml --namespace dev --create-namespace
+
+# Install - staging env
+helm install movie-review-chart helm/charts/movie-review -f helm/charts/movie-review/values-staging.yaml --namespace staging --create-namespace
+
+# List realeases
+helm list -A
+
+# Uninstall
+helm uninstall movie-review-chart --namespace dev/staging
+#+end_src
+
+** Test health endpoint
+#+begin_src shell
+# Port-forward the service
+kubectl port-forward pod/<POD_NAME> 3000:80 
+xh localhost:3000/health
+
+# OR check from inside of the container
+kubectl exec -it <POD_NAME> -- netstat -tlnp           # to sanity-check which port the service is running on
+kubectl exec -it <POD_NAME> -- wget -qO- http://localhost:3000/health
+
+# Expected output: {"status":"ok"}
+#+end_src
+
