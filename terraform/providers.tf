@@ -1,3 +1,4 @@
-provider "azurerm" {
+provider "google" {
   features {}
 }
+
