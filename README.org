@@ -70,7 +70,14 @@ full-devops-cycle-project/
 │       ├── DATABASE-service.yaml
 │       └── configmap.yaml
 │
-├── helm/charts/               → Helm chart for deployment
+├── k8s/                → Docs for Deploying cluster locally
+│   ├──  kind-bind-mount-2
+│   ├──  kind-bind-mount-1
+│   ├──  Taskfile.yaml
+│   ├──  README.org
+│   └──  kind-config.yaml.TEMPLATE
+│
+├── helm/charts/        → Helm chart for deployment
 │   └── movie-review/
 │       ├── templates/
 │       │   ├── movie-api-service.yaml
@@ -95,6 +102,7 @@ full-devops-cycle-project/
 │   ├── providers.tf
 │   ├── main.tf
 │   ├── dev.tfvars
+│   ├── staging.tfvars
 │   ├── backend.sh
 │   ├── backend-staging.tf
 │   └── backend-dev.tf
@@ -109,6 +117,7 @@ full-devops-cycle-project/
 │   └── actions
 │       └── Taskfile.yaml
 │
+├── Taskfile.yaml
 └── README.org
 #+end_src
 
@@ -278,7 +287,7 @@ terraform apply plan.tfplan
 
 *** OPTIONAL: Deploy only Kubernetes Cluster Manually
 **** Minikube/KinD
-If you want to test the cluster locally, visit [[file:/movie-review-platform/k8s-cluster-local/README.org][k8s-cluster-local/README.org]].
+If you want to test the cluster locally, visit [[file:/k8s-cluster-local/README.org][k8s-cluster-local/README.org]]
 
 **** Google Kubernetes Engine (GKE)
 NOTE: If you have deployed additional resources (such as load balancers) that reference the VPC/Subnets/Etc... you may need to manually clean up those resources in order for this command to succeed. You should also verify that you have cleaned up all resources to avoid unwanted costs.
