@@ -10,6 +10,7 @@ resources:
 patches:
   - path: patch-deployment.yaml
   - path: patch-configmap.yaml
+  - path: patch-hpa.yaml
 
 labels:
   - pairs:
