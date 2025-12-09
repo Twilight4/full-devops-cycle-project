@@ -289,14 +289,17 @@ kubectl delete namespace ingress-nginx
 # Install - default env (namespace env equivelent to k8s/base)
 helm install movie-review-chart helm/charts/movie-review
 
-# Upgrade - dev env
-helm upgrade --install movie-review-chart helm/charts/movie-review -f values-dev.yaml --namespace dev
+# Install - dev env
+helm install movie-review-chart helm/charts/movie-review -f helm/charts/movie-review/values-dev.yaml --namespace dev --create-namespace
 
-# Upgrade - staging env
-helm upgrade --install movie-review-chart helm/charts/movie-review -f values-staging.yaml --namespace staging
+# Install - staging env
+helm install movie-review-chart helm/charts/movie-review -f helm/charts/movie-review/values-staging.yaml --namespace staging --create-namespace
+
+# List realeases
+helm list -A
 
 # Uninstall
-helm uninstall movie-review-chart
+helm uninstall movie-review-chart --namespace dev/staging
 #+end_src
 
 **** Test health endpoint
@@ -344,7 +347,7 @@ Kubernetes:
 - [ ] Implement CosmosDB integration for Azure (ConfigMap, Secret, CosmosDB ExternalName Service)
 - [ ] Implement network policy for CosmosDB database
 - [ ] Implement PersistentVolumeClaims to CosmosDB
-- [ ] Implement helm charts packaging and templating with namespace/env separation
+- [X] Implement helm charts packaging and templating with namespace/env separation
 - [ ] After CosmosDB creation Success:
   + correct the 3 manifests (cosmos-service.yaml, secret.yaml, netpo.yaml) and test
   + add the 3 manifests (cosmos-service.yaml, secret.yaml, netpo.yaml) to helm chart
