@@ -6,6 +6,10 @@ on:
     tags: "[0-9]*.[0-9]*.[0-9]*"
     paths:
       - "app/**/*"  # only rebuild when app code changes
+    paths-ignore:   # exclude tese files
+      - "app/README.md"
+      - "app/Taskfile.yaml"
+      - "app/api-node/Taskfile.yaml"
   workflow_dispatch:
 
 jobs:
