@@ -71,11 +71,11 @@ full-devops-cycle-project/
 │       └── configmap.yaml
 │
 ├── k8s/                → Docs for Deploying cluster locally
-│   ├──  kind-bind-mount-2
-│   ├──  kind-bind-mount-1
-│   ├──  Taskfile.yaml
-│   ├──  README.org
-│   └──  kind-config.yaml.TEMPLATE
+│   ├── kind-bind-mount-2
+│   ├── kind-bind-mount-1
+│   ├── Taskfile.yaml
+│   ├── README.org
+│   └── kind-config.yaml.TEMPLATE
 │
 ├── helm/charts/        → Helm chart for deployment
 │   └── movie-review/
@@ -250,6 +250,7 @@ Terraform provisions GCP infrastructure:
 - go-task
 - docker
 - kubectl
+- kubectx
 - minikube or kind
 - helm (v3)
 - terraform
@@ -290,12 +291,18 @@ terraform apply plan.tfplan
 If you want to test the cluster locally, visit [[file:/k8s-cluster-local/README.org][k8s-cluster-local/README.org]]
 
 **** Google Kubernetes Engine (GKE)
-NOTE: If you have deployed additional resources (such as load balancers) that reference the VPC/Subnets/Etc... you may need to manually clean up those resources in order for this command to succeed. You should also verify that you have cleaned up all resources to avoid unwanted costs.
 
 #+begin_src shell
-# To create a cluster run
+# View task commands from root directory
+go-task --list-all
+
+# Create the GCP network, subnet, firewall rules, and cluster in sequence and connect to the GKE cluster
 go-task gcp:07-create-all
 go-task gcp:08-connect-to-cluster
+
+# NOTE: If you have deployed additional resources (such as load balancers) that reference the VPC/Subnets/Etc... 
+# you may need to manually clean up those resources in order for 'go-task gcp:09-clean-up' command to succeed. 
+# You should also verify that you have cleaned up all resources to avoid unwanted costs.
 
 # To destroy the cluster run
 go-task gcp:09-clean-up
