@@ -2,11 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: movie-api-deployment
+  name: {{ printf "%s%s" (.Values.namePrefix | default "") "movie-api-deployment" }}
   labels:
     app: movie-api
+    {{- range $key, $val := .Values.labels }}
+    {{ $key }}: {{ $val }}
+    {{- end }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: movie-api
@@ -18,8 +21,10 @@ spec:
       terminationGracePeriodSeconds: 20
       containers:
       - name: movie-api
-        image: ghcr.io/twilight4/api-node:0.0.1-24-g33169f0
-        imagePullPolicy: Always
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          {{- toYaml .Values.env | nindent 12 }}
         ports:
         - containerPort: 3000
         livenessProbe:
@@ -47,10 +52,4 @@ spec:
           seccompProfile:
             type: RuntimeDefault
         resources:
-          requests:
-            cpu: "250m"
-            memory: "300Mi"
-          limits:
-            cpu: "500m"
-            memory: "400Mi"
-
+          {{- toYaml .Values.resources | nindent 12 }}

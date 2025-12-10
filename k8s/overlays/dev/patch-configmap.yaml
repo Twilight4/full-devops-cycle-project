@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: movie-api-config
-data:
-  COSMOSDB_DATABASE: movie-api-dev

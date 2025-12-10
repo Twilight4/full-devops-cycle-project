@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: staging-
+namespace: staging
+
+resources:
+  - ../../../deploy-services/movie-api/manifests/
+  - ../../../deploy-services/movie-api/namespaces/
+
+patches:
+  - path: ./patches/Deployment.yaml
+  - path: ./patches/Configmap.yaml
+  - path: ./patches/Hpa.yaml
+
+labels:
+  - pairs:
+      env: staging
+
+images:
+  - name: ghcr.io/twilight4/api-node
+    newTag: 0.0.1-49-g97a530e # STAGING_IMAGE_TAG
