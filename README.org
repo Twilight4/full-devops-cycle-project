@@ -10,9 +10,10 @@
   - [[#prerequisites][Prerequisites]]
   - [[#terraform-resources][Terraform resources]]
   - [[#1-authenticate-and-set-up-gcp][1. Authenticate and set up GCP]]
-  - [[#2-deploy-the-infrastructure-using-terraform][2. Deploy the infrastructure using terraform]]
-  - [[#3-verify-deployment][3. Verify deployment]]
-  - [[#4-clean-up][4. Clean up]]
+  - [[#2-create-terraform-state-backend][2. Create Terraform State Backend]]
+  - [[#3-deploy-the-infrastructure-using-terraform][3. Deploy the infrastructure using terraform]]
+  - [[#4-verify-deployment][4. Verify deployment]]
+  - [[#5-clean-up][5. Clean up]]
 - [[#setup-gitops-argocd-wip][Setup GitOps (ArgoCD) (WIP)]]
 - [[#roadmap-wip][Roadmap (WIP)]]
 
@@ -103,16 +104,25 @@ full-devops-cycle-project/
 │       └── Chart.yaml
 │
 ├── terraform/          → Infrastructure as Code (GCP)
-│   ├── versions.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── providers.tf
-│   ├── main.tf
-│   ├── dev.tfvars
-│   ├── staging.tfvars
-│   ├── backend.sh
-│   ├── backend-staging.tf
-│   └── backend-dev.tf
+│  ├── modules/
+│  │   └── gke/
+│  │       ├── variables.tf
+│  │       ├── outputs.tf
+│  │       └── main.tf
+│  ├── envs/
+│  │   ├── staging/
+│  │   │   ├── variables.tf
+│  │   │   ├── terraform.tfvars
+│  │   │   ├── main.tf
+│  │   │   └── backend.tf
+│  │   └── production/
+│  │       ├── variables.tf
+│  │       ├── terraform.tfvars
+│  │       ├── main.tf
+│  │       └── backend.tf
+│  ├── versions.tf
+│  ├── providers.tf
+│  └── backend.sh
 │
 ├── monitoring/         → Node + monitoring configuration
 │   ├── grafana-dashboards/
@@ -304,7 +314,23 @@ gcloud config set compute/zone <GCP_ZONE>
 gcloud config configurations list
 #+end_src
 
-** 2. Deploy the infrastructure using terraform
+** 2. Create Terraform State Backend
+Terraform needs a remote backend to store its state.
+
+#+begin_src shell
+# Modify the variables of backend.sh script and run the script
+./backend.sh
+#+end_src
+
+Then update =global/backend.tf= to point at this container.
+#+begin_src tf
+resource_group_name  = "rg-tfstate"
+storage_account_name = "tfstatestorage4123"
+container_name       = "tfstate"
+key                  = "dev.terraform.tfstate"
+#+end_src
+
+** 3. Deploy the infrastructure using terraform
 #+begin_src shell
 # Select environment to use
 cd terraform/envs/staging
@@ -330,7 +356,7 @@ If you want to test the cluster locally, visit [[file:/k8s-cluster-local/README.
 go-task --list-all
 
 # Create the GCP network, subnet, firewall rules, and cluster in sequence and connect to the GKE cluster
-go-task gcp:01-init-cli
+go-task gcp:01-init-cli          # to run gcloud init for automated setup
 go-task gcp:07-create-all
 go-task gcp:08-connect-to-cluster
 
@@ -342,7 +368,7 @@ go-task gcp:08-connect-to-cluster
 go-task gcp:09-clean-up
 #+end_src
 
-** 3. Verify deployment
+** 4. Verify deployment
 *** Using GCP Portal
 #+begin_src shell
 
@@ -353,7 +379,7 @@ go-task gcp:09-clean-up
 
 #+end_src
 
-** 4. Clean up
+** 5. Clean up
 #+begin_src shell
 # Remove all terraform resources and avoid charges
 terraform destroy -var-file=dev.tfvars
