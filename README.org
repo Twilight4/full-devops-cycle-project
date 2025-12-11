@@ -229,6 +229,7 @@ Google offers a 90-day, [[https://cloud.google.com/free][$300 free trial]] for n
 
 Terraform provisions GCP infrastructure:
 - GKE cluster
+- GCS bucket for tfstate backend
 - GCP DB NoSQL Database
 - VPC, subnets, and firewall rules
 - Artifact Registry (GCR)
@@ -315,18 +316,44 @@ gcloud config configurations list
 ** 2. Create Terraform State Backend
 Terraform needs a remote backend to store its state.
 
+The =backend.sh= script creates the following resources for currently set project:
+- GCS bucket with enabled bucket versioning
+- dedicated service account with the privileges: storage.admin and viewer
+- key for the Terraform backend
+
+The SA and key are created for the purpose of:
+- CI/CD automation (Stable, non-expiring credentials)
+- Least privilege access
+- Auditability
+- Stable & central
+- Avoid using user credentials in automation (Actions are logged under the SA, not a human user)
+
 #+begin_src shell
-# Modify the variables of backend.sh script and run the script
+# Modify the LOCATION variable and PROJECT_ID to yours and optionally other vars before executing
 ./backend.sh
+
+# Store the exported terraform-sa-key.json in a secure place in your local machine e.g. ~/.gcp/terraform-sa-key.json
+# The set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to it (for persistence save in shell profile e.g. .zshrc)
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.gcp/terraform-sa-key.json"
+
+# If you want to clean up the created resources by backend.sh
+PROJECT_ID=<my-project> BUCKET_NAME=<tfstate-12345> ./delete-backend.sh
+
+# To view the created resources
+gcloud config get-value project                             # Outputs the current project ID set in gcloud
+gcloud storage buckets list --project <PROJECT_ID>          # Check if the bucket exists
+gcloud iam service-accounts list --project <PROJECT_ID>     # List all service accounts in the project
+
+# NOTE: You don't need to authenticate gcloud using that key
+# Terraform will automatically pick up the exported 'GOOGLE_APPLICATION_CREDENTIALS' value
+#  and execute actions (init, plan, apply) as the SA account
+# Authenticate if you want to run gcloud commands as the SA for (debugging or verifying permissions)
+gcloud auth activate-service-account --key-file=<KEY_FILE>
+# Check which account is active (The * indicates the active account)
+gcloud auth list
 #+end_src
 
-Then update =backend.tf= to point at this container.
-#+begin_src tf
-resource_group_name  = "rg-tfstate"
-storage_account_name = "tfstatestorage4123"
-container_name       = "tfstate"
-key                  = "dev.terraform.tfstate"
-#+end_src
+Then update backend.tf's =bucket= argument to point to the =<BUCKET_NAME>=.
 
 ** 3. Deploy the infrastructure using terraform
 #+begin_src shell
