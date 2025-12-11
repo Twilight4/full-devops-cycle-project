@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "my-terraform-state"
-    prefix = "staging"
+    bucket = "tfstate-13788"
+    prefix = "production/gke"
   }
 }
