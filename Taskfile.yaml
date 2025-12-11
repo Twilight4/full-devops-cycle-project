@@ -52,7 +52,7 @@ tasks:
   gcp:06-create-cluster:
     desc: "Create GKE cluster"
     vars:
-      GCP_PROJECT_ID: kubernetes-course-424917
+      GCP_PROJECT_ID: movie-review-platform8451
     cmds:
       - |
         gcloud container clusters create ${CLUSTER_NAME} \
