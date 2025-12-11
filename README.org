@@ -433,6 +433,7 @@ CI/CD:
 - [X] Building and pushing image to GHCR for multi-architecture
 - [X] Update staging/production tags for push to main or release tag
 - [X] Create Pull Request with image tag changes
+- [ ] Apply the updated manifests into cluster
 
 Kubernetes:
 - [X] Create necessary manifest files (deployment, service, ingress)
