@@ -1,10 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
-RESOURCE_GROUP_NAME="rg-tfstate"
-STORAGE_ACCOUNT_NAME="tfstatestorage3214"
-CONTAINER_NAME="tfstate"
-LOCATION="westeurope"
+PROJECT_ID="movie-review-platform8451"     # Project ID
+BUCKET_NAME="tfstate-$RANDOM"              # Bucket name
+LOCATION="europe-central2"                 # Region
+SA_NAME="terraform"                        # Service account name
+
+# The iam.gserviceaccount.com is the domain suffix for all GCP service accounts
+SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+
+# Key file for terraform usage
+KEY_FILE="terraform-sa-key.json"
 
 log() {
   echo "[INFO] $1"
@@ -16,36 +22,38 @@ error() {
 
 trap 'error "Script failed at line $LINENO."' ERR
 
-log "Creating resource group: $RESOURCE_GROUP_NAME"
-az group create \
-  --name "$RESOURCE_GROUP_NAME" \
-  --location "$LOCATION"
+log "Creating GCS bucket: $BUCKET_NAME"
+gcloud storage buckets create "gs://$BUCKET_NAME" \
+  --location="$LOCATION" \
+  --uniform-bucket-level-access
 
-log "Creating storage account: $STORAGE_ACCOUNT_NAME"
-az storage account create \
-  --resource-group "$RESOURCE_GROUP_NAME" \
-  --name "$STORAGE_ACCOUNT_NAME" \
-  --sku Standard_LRS \
-  --encryption-services blob \
-  --location "$LOCATION"
+log "Enabling bucket versioning"
+gcloud storage buckets update "gs://$BUCKET_NAME" --versioning
 
-log "Retrieving storage account key"
-ACCOUNT_KEY=$(az storage account keys list \
-  --resource-group "$RESOURCE_GROUP_NAME" \
-  --account-name "$STORAGE_ACCOUNT_NAME" \
-  --query '[0].value' -o tsv)
+# Create Terraform service account
+log "Creating service account: $SA_NAME"
+gcloud iam service-accounts create "$SA_NAME" \
+  --display-name "Terraform Automation"
 
-log "Creating blob container: $CONTAINER_NAME"
-az storage container create \
-  --name "$CONTAINER_NAME" \
-  --account-name "$STORAGE_ACCOUNT_NAME" \
-  --account-key "$ACCOUNT_KEY"
+log "Granting Storage Admin + Viewer to service account"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/storage.admin"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/viewer"
+
+# Create key for Terraform usage
+log "Creating service account key: $KEY_FILE"
+gcloud iam service-accounts keys create "$KEY_FILE" \
+  --iam-account="$SA_EMAIL"
 
 log "All commands completed successfully."
 
 echo ""
-echo "resource_group_name:  $RESOURCE_GROUP_NAME"
-echo "storage_account_name: $STORAGE_ACCOUNT_NAME"
-echo "container_name:       $CONTAINER_NAME"
-echo "location:             $LOCATION"
-echo "access_key:           $ACCOUNT_KEY"
+echo "project_id:      $PROJECT_ID"
+echo "bucket_name:     $BUCKET_NAME"
+echo "location:        $LOCATION"
+echo "sa_email:        $SA_EMAIL"
+echo "key_file:        $KEY_FILE"
