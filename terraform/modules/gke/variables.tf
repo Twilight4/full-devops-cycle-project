@@ -11,8 +11,8 @@ variable "subnetwork" {
   type = string
 }
 variable "node_count" {
-  default = 1
+  type = string
 }
 variable "node_machine_type" {
-  default = "e2-small"
+  type = string
 }
