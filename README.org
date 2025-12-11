@@ -6,9 +6,9 @@
   - [[#full-project-directory-structure][Full Project Directory Structure]]
   - [[#full-architecture-diagram][Full Architecture Diagram]]
   - [[#project-scope--technologies-used][Project Scope / Technologies Used]]
-- [[#deploy-cloud-infrastructure-wip][Deploy Cloud Infrastructure (WIP)]]
   - [[#prerequisites][Prerequisites]]
-  - [[#terraform-resources][Terraform resources]]
+- [[#deploy-cloud-infrastructure-wip][Deploy Cloud Infrastructure (WIP)]]
+  - [[#terraform-resources-overview][Terraform resources overview]]
   - [[#1-authenticate-and-set-up-gcp][1. Authenticate and set up GCP]]
   - [[#2-create-terraform-state-backend][2. Create Terraform State Backend]]
   - [[#3-deploy-the-infrastructure-using-terraform][3. Deploy the infrastructure using terraform]]
@@ -260,8 +260,6 @@ Terraform provisions GCP infrastructure:
 - Kubernetes Secret Management
 - Terraform IAM least-privilege model
 
-
-* Deploy Cloud Infrastructure (WIP)
 ** Prerequisites
 - git
 - go-task
@@ -274,7 +272,9 @@ Terraform provisions GCP infrastructure:
 - GCP subscription
 - google-cloud-cli
 
-** Terraform resources
+
+* Deploy Cloud Infrastructure (WIP)
+** Terraform resources overview
 Terraform will create resources in the following sequence:
 1. GCP Network
 2. subnet
