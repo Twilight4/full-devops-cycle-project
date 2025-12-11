@@ -2,6 +2,7 @@ module "gke" {
   source = "../../modules/gke"
 
   cluster_name = "${var.prefix}-gke"
+  prefix       = "stg"
   region       = var.region
 
   network           = google_compute_network.gke_vpc.id
