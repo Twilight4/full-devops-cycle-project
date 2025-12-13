@@ -20,7 +20,7 @@ hpa:
 
 ingress:
   className: nginx-ingress
-  host: ""
+  host: "movie-api.GOOGLE_DOMAIN.com"
 
 config:
   COSMOSDB_DATABASE: "movie-api"
