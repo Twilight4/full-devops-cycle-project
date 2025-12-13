@@ -5,6 +5,6 @@ includes:
     taskfile: ./github-actions/Taskfile.yaml
     dir: ./github-actions
 
-  kluctl-gitops:
+  gitops:
     taskfile: ./argocd-gitops/Taskfile.yaml
     dir: ./argocd-gitops

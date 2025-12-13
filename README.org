@@ -399,7 +399,7 @@ go-task --list-all
 # Render production env
 go-task render-production
 
-# Apply production env (default namespace)
+# Apply production env
 go-task deploy-production
 
 # To delete production env
@@ -532,7 +532,7 @@ Terraform - replicate in GCP
 - [ ] Artifact Registry (GCR)
 
 GitOps:
-- [ ] Automated Kubernetes deployments with ArgoCD
+- [X] Automated Kubernetes deployments with ArgoCD
 - [ ] Declarative Helm charts
 - [ ] Git-driven versioning and rollbacks 
 
