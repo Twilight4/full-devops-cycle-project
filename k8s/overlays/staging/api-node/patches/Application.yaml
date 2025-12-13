@@ -1,8 +1,0 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: movie-api-argo-application
-  namespace: argocd
-spec:
-  destination:
-    namespace: staging

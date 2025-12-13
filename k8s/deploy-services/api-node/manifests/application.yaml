@@ -11,10 +11,7 @@ spec:
     path: k8s/deploy-services/api-node
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
   syncPolicy:
-    syncOptions:
-    - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true

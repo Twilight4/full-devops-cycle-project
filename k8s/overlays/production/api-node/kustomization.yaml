@@ -4,13 +4,11 @@ kind: Kustomization
 namespace: production
 
 resources:
-  - ../../../deploy-services/movie-api/manifests/
-  - ../../../deploy-services/movie-api/namespaces/
+  - ../../../deploy-services/api-node/manifests/
 
 patches:
   - path: ./patches/Deployment.yaml
-  - path: ./patches/Ingress.yaml
-  - path: ./patches/Application.yaml
+#  - path: ./patches/Ingress.yaml
 
 images:
   - name: ghcr.io/twilight4/api-node

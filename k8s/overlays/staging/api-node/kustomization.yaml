@@ -5,15 +5,13 @@ namePrefix: staging-
 namespace: staging
 
 resources:
-  - ../../../deploy-services/movie-api/manifests/
-  - ../../../deploy-services/movie-api/namespaces/
+  - ../../../deploy-services/api-node/manifests/
 
 patches:
   - path: ./patches/Deployment.yaml
   - path: ./patches/Configmap.yaml
   - path: ./patches/Hpa.yaml
-  - path: ./patches/Ingress.yaml
-  - path: ./patches/Application.yaml
+#  - path: ./patches/Ingress.yaml
 
 labels:
   - pairs:

@@ -26,12 +26,14 @@ tasks:
 
   deploy-staging:
     cmds:
+      - kubectl apply -f api-node/namespaces/
       - kubectl create namespace staging
       - kubectl apply -k ../overlays/staging
     desc: "Deploy staging configuration"
 
   deploy-production:
     cmds:
+      - kubectl apply -f api-node/namespaces/
       - kubectl create namespace production
       - kubectl apply -k ../overlays/production
     desc: "Deploy production configuration"
