@@ -30,42 +30,6 @@ kubectl get nodes
 go-task kind:04-delete-cluster
 #+end_src
 
-** Apply manifests
-*** Using kubectl
-#+begin_src shell
-# Navigate to Taskfile.yaml directory
-cd k8s/deploy
-go-task --list-all
-
-# Render production env
-go-task render-production
-
-# Apply production env (default namespace)
-go-task deploy-production
-
-# To delete production env
-go-task delete-production
-#+end_src
-
-*** Using helm
-#+begin_src shell
-# Navigate to Taskfile.yaml directory
-cd k8s/helm
-go-task --list-all
-
-# Render production env
-go-task render-template-production
-
-# Install production env (default namespace)
-go-task install-template-production
-
-# List realeases
-helm list -A
-
-# Uninstall production env
-go-task uninstall-template-production
-#+end_src
-
 ** Test health endpoint
 #+begin_src shell
 # Port-forward the service
