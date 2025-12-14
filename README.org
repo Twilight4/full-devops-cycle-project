@@ -681,15 +681,11 @@ Terraform - replicate in GCP
 - [X] VPC
   + [X] Subnet
 - [X] GKE cluster
-- [ ] EC2 instances
-- [ ] Cloud Storage bucket
-- [ ] Security groups + rules
-- [ ] Application load balancer
-  + [ ] ALB target group + attachment
-- [ ] Route 53 zone + record
-- [ ] RDS instance
+- [X] EC2 instances
+- [X] Cloud Storage bucket
+- [X] Security groups + rules
+- [X] Application load balancer
 - [ ] GCP DB database
-- [ ] Artifact Registry (GCR)
 
 Grafana, Prometheus:
 - [ ] 
