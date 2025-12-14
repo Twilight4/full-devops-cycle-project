@@ -442,8 +442,10 @@ go-task gcp:08-connect-to-cluster
 # you may need to manually clean up those resources in order for 'go-task gcp:09-clean-up' command to succeed. 
 # You should also verify that you have cleaned up all resources to avoid unwanted costs.
 
-# To destroy the cluster run
-go-task gcp:09-clean-up
+# Connect to the cluster
+go-task gcp:08-connect-to-cluster
+# Select cluster to use with kubectl commands
+kubectx
 #+end_src
 
 ** 4. Apply manifest files into the cluster
@@ -504,21 +506,110 @@ go-task delete-staging-cluster
 #+end_src
 
 ** 5. Verify deployment
-*** Using GCP Portal
-- Go to [[https://console.cloud.google.com/][console.cloud.google.com]]:
-  + Navigate to *Kubernetes Engine* → *Clusters*
-  + Navigate to *Compute Engine* → *Overview*
-  + Navigate to *Cloud Storage* → *Buckets*
-  + Navigate to *VPC Netowkr* → *VPC Networks/IP Addresses/Firewall*
-- Verify the resources exist
+*** Using [[https://console.cloud.google.com/][GCP Portal]]
+**** Kubernetes Engine
+Clusters/Node Pools:
+- Navigate to Kubernetes Engine → Clusters
+- Click on a specific cluster → Node pools tab
 
-*** Using google-cloud-cli
+**** Compute Engine
+VM Instances/Disks/Networks & Subnets/Firewall Rules:
+- Navigate to Compute Engine → VM instances → Overview
+- Navigate to Compute Engine → Disks
+- Navigate to VPC network → VPC networks
+- Navigate to VPC network → Subnetworks
+- Navigate to VPC network → Firewall
+
+**** Cloud Storage
+Buckets:
+- Navigate to Storage → Browser
+- Shows all buckets in the project
+- Click a bucket → Objects tab shows stored objects
+
+**** VPC Networks
+IP Addresses/Routes/Firewall Rules:
+- Navigate to VPC network → External IP addresses
+- Navigate to VPC network → Routes
+- Navigate to VPC network → Firewall
+
+**** IAM & Service Accounts
+Service Accounts/IAM Policies/Roles:
+- Navigate to IAM & Admin → Service Accounts
+- Navigate to IAM & Admin → IAM
+
+**** APIs & Services
+Enabled APIs:
+- Navigate to APIs & Services → Dashboard
+
+*** Using =google-cloud-cli=
+**** Kubernetes Engine: Clusters / Node Pools
 #+begin_src shell
 # Check if the cluster is running
 gcloud container clusters list --region <REGION>
 
 # Get info about the cluster
 gcloud container clusters describe <CLUSTER_NAME> --region <REGION>
+
+# List node pools in a cluster
+gcloud container node-pools list --cluster <CLUSTER_NAME> --region <REGION>
+
+# Get info about a specific node pool
+gcloud container node-pools describe <NODE_POOL_NAME> --cluster <CLUSTER_NAME> --region <REGION>
+#+end_src
+
+**** Compute Engine → Instances / Disks / Networks
+#+begin_src shell
+# List VM instances
+gcloud compute instances list
+# or filter by zone
+gcloud compute instances list --zones <ZONE>
+
+# List disks
+gcloud compute disks list
+#+end_src
+
+**** Cloud Storage → Buckets
+#+begin_src shell
+# List all buckets in a project
+gcloud storage buckets list
+# or for older versions
+gcloud alpha storage buckets list
+
+# Get details of a bucket
+gcloud storage buckets describe gs://<BUCKET_NAME>
+#+end_src
+
+**** VPC Networks → IP addresses / Firewall
+#+begin_src shell
+# List networks
+gcloud compute networks list
+
+# List subnets
+gcloud compute networks subnets list --region <REGION>
+
+# List external IP addresses
+gcloud compute addresses list
+
+# List firewall rules (all networks)
+gcloud compute firewall-rules list
+
+# List routes
+gcloud compute routes list
+#+end_src
+
+**** Service Accounts
+#+begin_src shell
+# List service accounts
+gcloud iam service-accounts list
+
+# Get details about a specific service account
+gcloud iam service-accounts describe <SA_EMAIL>
+
+# List the IAM roles granted to a service account
+gcloud projects get-iam-policy <PROJECT_ID> \
+    --flatten="bindings[].members" \
+    --format="table(bindings.role, bindings.members)" \
+    --filter="bindings.members:<SA_NAME>@<PROJECT_ID>.iam.gserviceaccount.com"
 #+end_src
 
 *** Verify GKE api-node service
@@ -539,6 +630,9 @@ xh get http://<CLUSTER_IP>/health
 #+begin_src shell
 # Remove all terraform resources and avoid charges
 terraform destroy -var-file=dev.tfvars
+
+# If you created cluster manually using gcloud, to destroy the cluster run
+go-task gcp:09-clean-up
 #+end_src
 
 
