@@ -5,19 +5,25 @@ tasks:
     desc: "Deploy argocd gitops staging target"
     cmds:
       - kubectl apply -f namespaces/argocd.yaml
+      - kubectl create namespace staging
+      - kubectl create namespace ingress-nginx
+      - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/staging/application.yaml
 
   deploy-production-cluster:
     desc: "Deploy argocd gitops production target"
     cmds:
       - kubectl apply -f namespaces/argocd.yaml
+      - kubectl create namespace production
+      - kubectl create namespace ingress-nginx
+      - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/production/application.yaml
       
   delete-staging-cluster:
     desc: "Deploy argocd gitops staging target"
     cmds:
       - kubectl delete -f clusters/staging/application.yaml
-      - kubectl delete -f namespaces/argocd
+      - kubectl delete -f namespaces/argocd.yaml
       - kubectl delete namespace staging
       - kubectl delete namespace ingress-nginx
 
@@ -25,7 +31,7 @@ tasks:
     desc: "Deploy argocd gitops production target"
     cmds:
       - kubectl delete -f clusters/production/application.yaml
-      - kubectl delete -f namespaces/argocd
+      - kubectl delete -f namespaces/argocd.yaml
       - kubectl delete namespace production
       - kubectl delete namespace ingress-nginx
 
