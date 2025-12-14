@@ -13,7 +13,7 @@ resource "google_container_cluster" "primary" {
   subnetwork = var.subnetwork
 
   remove_default_node_pool = true
-  initial_node_count       = 2
+  initial_node_count       = 1
 
   # allocate Pod + Service IP ranges automatically (Autopilot-style IP) via VPC-native routing
   ip_allocation_policy {}
@@ -29,6 +29,8 @@ resource "google_container_node_pool" "primary_nodes" {
   node_config {
     preemptible  = true
     machine_type = var.node_machine_type
+    disk_size_gb = var.disk_size_gb # Defaults to 100GB
+    disk_type    = var.disk_type    # defaults to pd-balanced
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = google_service_account.gke_nodes.email
