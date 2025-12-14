@@ -35,14 +35,40 @@ log "Creating service account: $SA_NAME"
 gcloud iam service-accounts create "$SA_NAME" \
   --display-name "Terraform Automation"
 
-log "Granting Storage Admin + Viewer to service account"
+log "Granting necessary privileges to service account"
+# Enabled roles:
+# roles/storage.admin
+# roles/viewer
+# roles/serviceusage.admin
+# roles/compute.networkAdmin
+# roles/iam.serviceAccountAdmin
+# roles/container.admin
+# roles/monitoring.admin
+# roles/logging.admin
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:$SA_EMAIL" \
   --role="roles/storage.admin"
-
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:$SA_EMAIL" \
   --role="roles/viewer"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/serviceusage.admin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/compute.networkAdmin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/iam.serviceAccountAdmin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/container.admin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/monitoring.admin"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/logging.admin"
 
 # Create key for Terraform usage
 log "Creating service account key: $KEY_FILE"
