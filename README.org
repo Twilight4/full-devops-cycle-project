@@ -387,13 +387,13 @@ go-task 04-delete-cluster
 **** Test health endpoint
 #+begin_src shell
 # Port-forward the service
-kubectl port-forward pod/<POD_NAME> 3000:80 
-xh localhost:3000/health
+kubectl port-forward svc/<SVC_NAME> 3000:80 
 
 # OR check from inside of the container
 kubectl exec -it <POD_NAME> -- netstat -tlnp           # to sanity-check which port the service is running on
 kubectl exec -it <POD_NAME> -- wget -qO- http://localhost:3000/health
 
+xh localhost:3000/health
 # Expected output: {"status":"ok"}
 #+end_src
 
@@ -509,7 +509,7 @@ go-task delete-staging-cluster
 xh http://<CLUSTER_IP>/movies
 
 # POST /movies - Adds a movie
-xh post http://localhost:3000/movies title="Avatar 2" rating:=4
+xh post http://<CLUSTER_IP>/movies title="Avatar 2" rating:=4
 xh http://<CLUSTER_IP>/movies
 
 # GET /health - For Kubernetes probes
