@@ -11,7 +11,7 @@
   - [[#terraform-resources-overview][Terraform resources overview]]
   - [[#1-authenticate-and-set-up-gcp][1. Authenticate and set up GCP]]
   - [[#2-create-terraform-state-backend][2. Create Terraform State Backend]]
-  - [[#3-deploy-the-infrastructure][3. Deploy the infrastructure]]
+  - [[#3-deploy-the-cluster][3. Deploy the cluster]]
   - [[#4-apply-manifest-files-into-the-cluster][4. Apply manifest files into the cluster]]
   - [[#5-verify-deployment][5. Verify deployment]]
   - [[#6-clean-up-infrastructure][6. Clean up infrastructure]]
@@ -264,6 +264,8 @@ Terraform provisions GCP infrastructure:
 - terraform
 - GCP subscription
 - google-cloud-cli
+- google-cloud-cli-gsutil
+- google-cloud-cli-component-gke-gcloud-auth-plugin
 
 
 * Deploy Cloud Infrastructure (WIP)
@@ -277,6 +279,8 @@ Terraform will create resources in the following sequence:
 
 ** 1. Authenticate and set up GCP
 #+begin_src shell
+# Change values in root Taskfile.yaml for CLUSTER_NAME, GCP_REGION, GCP_ZONE
+
 # Authenticate to Google Cloud
 gcloud auth application-default login
 
@@ -295,9 +299,8 @@ gcloud billing projects describe <PROJECT_ID>
 ## Link a billing account to a project
 gcloud billing projects link <PROJECT_ID> --billing-account=<ACCOUNT_ID>
 
-# Enable the Google Compute Engine API for your project
-gcloud services enable compute.googleapis.com
-gcloud services enable cloudresourcemanager.googleapis.com
+# Manually enable critical APIs which can not be enabled by Terraform unless they are already enabled
+go-task gcp:02-enable-apis 
 
 # Set the default region and zone
 gcloud config set compute/region <GCP_REGION>
@@ -338,6 +341,12 @@ gcloud config get-value project                             # Outputs the curren
 gcloud storage buckets list --project <PROJECT_ID>          # Check if the bucket exists
 gcloud iam service-accounts list --project <PROJECT_ID>     # List all service accounts in the project
 
+# Check the bound iam policies for the created service account
+gcloud projects get-iam-policy <PROJECT_ID> \
+    --flatten="bindings[].members" \
+    --format="table(bindings.role, bindings.members)" \
+    --filter="bindings.members:<SA_NAME>@<PROJECT_ID>.iam.gserviceaccount.com"
+
 # NOTE: You don't need to authenticate gcloud using that key
 # Terraform will automatically pick up the exported 'GOOGLE_APPLICATION_CREDENTIALS' value
 # and execute actions (init, plan, apply) as the SA account
@@ -349,7 +358,7 @@ gcloud auth list
 
 Then update backend.tf's =bucket= argument to point to the =<BUCKET_NAME>=.
 
-** 3. Deploy the infrastructure
+** 3. Deploy the cluster
 *** Local Systems
 **** Minikube
 #+begin_src shell
@@ -412,6 +421,11 @@ terraform plan -out plan.tfplan
 
 # Apply the terraform configuration
 terraform apply plan.tfplan
+
+# Connect to the cluster
+go-task gcp:08-connect-to-cluster
+# Select cluster to use with kubectl commands
+kubectx
 #+end_src
 
 *** Google Kubernetes Engine (GKE)
@@ -476,9 +490,6 @@ cd cicd/
 # View task commands from root directory
 go-task --list-all
 
-# Install Argo CD
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
 # Access argocd UI via port-forwarding the argocd-server
 go-task port-forward-webui
 
@@ -494,13 +505,20 @@ go-task delete-staging-cluster
 
 ** 5. Verify deployment
 *** Using GCP Portal
-#+begin_src shell
-
-#+end_src
+- Go to [[https://console.cloud.google.com/][console.cloud.google.com]]:
+  + Navigate to *Kubernetes Engine* → *Clusters*
+  + Navigate to *Compute Engine* → *Overview*
+  + Navigate to *Cloud Storage* → *Buckets*
+  + Navigate to *VPC Netowkr* → *VPC Networks/IP Addresses/Firewall*
+- Verify the resources exist
 
 *** Using google-cloud-cli
 #+begin_src shell
+# Check if the cluster is running
+gcloud container clusters list --region <REGION>
 
+# Get info about the cluster
+gcloud container clusters describe <CLUSTER_NAME> --region <REGION>
 #+end_src
 
 *** Verify GKE api-node service
