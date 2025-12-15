@@ -8,22 +8,34 @@ env:
   MARGIN: "1 1"
 
 tasks:
-  01-generate-config:
+  minikube:01-create-cluster:
+    cmds:
+      - minikube start --driver docker
+    desc: "Create a Kubernetes cluster using Minikube (docker driver)"
+  minikube:02-enable-ingress:
+    cmds:
+      - minikube addons enable ingress
+    desc: "Enable Minikube ingress add-on"
+  minikube:03-delete-cluster:
+    cmds:
+      - minikube stop
+    desc: "Delete and existing minikube Kubernetes cluster"
+  kind:01-generate-config:
     cmds:
       - REPLACE_WITH_ABSOLUTE_PATH=${PWD} envsubst < kind-config.yaml.TEMPLATE > kind-config.yaml
     desc: "Generate kind config with local absolute paths for PV mounts"
 
-  02-create-cluster:
+  kind:02-create-cluster:
     cmds:
       - kind create cluster --config kind-config.yaml
-    desc: Create a Kubernetes cluster using kind
+    desc: "Create a Kubernetes cluster using kind"
 
-  03-run-cloud-provider-kind:
-    desc: "Run sigs.k8s.io/cloud-provider-kind@latest to enable load balancer services with KinD"
+  kind:03-run-cloud-provider-kind:
     cmds:
       - sudo cloud-provider-kind
+    desc: "Run sigs.k8s.io/cloud-provider-kind@latest to enable load balancer services with KinD"
 
-  04-delete-cluster:
+  kind:04-delete-cluster:
     cmds:
       - kind delete cluster
-    desc: Delete and existing a kind Kubernetes cluster
+    desc: "Delete and existing kind Kubernetes cluster"

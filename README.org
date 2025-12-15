@@ -377,12 +377,14 @@ If the GKE cluster is deleted manually via the GCP Console or =gcloud=, Terrafor
 *** Local Systems
 **** Minikube
 #+begin_src shell
-# Start cluster and enable ingress add-on
-minikube start
-minikube addons enable ingress
+# Start cluster 
+go-task minikube:01-create-cluster
 
-# Stop the cluster
-minikube stop
+# Enable ingress add-on
+go-task minikube:02-enable-ingress
+
+# Delete the cluster
+go-task minikube:03-delete-cluster
 #+end_src
 
 **** KinD
@@ -394,18 +396,18 @@ cd k8s-cluster-local
 go-task --list-all
 
 # Start cluster with 2 worker nodes
-go-task 01-generate-config        # it is going to create one container for control-plane and two containers for worker-nodes
-go-task 02-create-cluster
+go-task kind:01-generate-config        # it is going to create one container for control-plane and two containers for worker-nodes
+go-task kind:02-create-cluster
 
 # Verify
 kubectl get nodes
 
 # The cloud-provider-kind tool enables to run load-balancers within the kind cluster so we'll be able to access it from the host
 # when we'll deploy a service with kind: LoadBalancer, install it when you want to deploy LoadBalancer services
-#go-task 03-run-cloud-provider-kind  
+#go-task kind:03-run-cloud-provider-kind  
 
 # Delete the cluster
-go-task 04-delete-cluster
+go-task kind:04-delete-cluster
 #+end_src
 
 **** Test health endpoint
@@ -431,14 +433,14 @@ cd terraform/envs
 go-task --list-all
 
 # Initialize terraform for production env
-go-task 01-init-production
+go-task terraform:01-init-production
 
 # Validate and review the planned configuration
-go-task 02-validate-production
-go-task 03-plan-production
+go-task terraform:02-validate-production
+go-task terraform:03-plan-production
 
 # Apply the terraform configuration
-go-task 04-apply-production
+go-task terraform:04-apply-production
 
 # Connect to the cluster
 go-task gcp:08-connect-to-cluster
@@ -670,16 +672,19 @@ xh get http://<CLUSTER_IP>/health
 #+end_src
 
 ** 6. Clean up infrastructure
+*** Terraform destroy / gcloud
 #+begin_src shell
 # Remove all terraform resources and avoid charges
-go-task 05-destroy-production
-go-task 07-clean-plan-production
+cd terraform/
+go-task terraform:05-destroy-production
+go-task terraform:07-clean-plan-production
 
 # If you created cluster manually using gcloud, to destroy the cluster run
 go-task gcp:09-clean-up
 #+end_src
 
-NOTE: If infrastructure destruction fails and leaves behind unwanted GCP resources (e.g. due to partial Terraform destroys, state drift, or manual intervention), those resources may continue to incur cost.
+*** GCP-nuke
+If infrastructure destruction fails and leaves behind unwanted GCP resources (e.g. due to partial Terraform destroys, state drift, or manual intervention), those resources may continue to incur cost.
 
 As a last-resort cleanup option, you can use the [[https://github.com/ekristen/gcp-nuke][gcp-nuke]] to remove all resources from a GCP Project, use this tool when normal Terraform/gcloud cleanup has failed:
 #+begin_src shell
