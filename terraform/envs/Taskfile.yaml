@@ -1,0 +1,106 @@
+version: "3"
+
+vars:
+  STAGING_DIR: envs/staging
+  PROD_DIR: envs/production
+  PLAN_FILE: plan.tfplan
+
+tasks:
+
+  # ======================
+  # STAGING
+  # ======================
+
+  01-init-staging:
+    desc: "Initialize Terraform (staging)"
+    dir: "{{.STAGING_DIR}}"
+    cmds:
+      - terraform init
+
+  02-validate-staging:
+    desc: "Validate Terraform configuration (staging)"
+    dir: "{{.STAGING_DIR}}"
+    cmds:
+      - terraform validate
+
+  03-plan-staging:
+    desc: "Create Terraform plan (staging)"
+    dir: "{{.STAGING_DIR}}"
+    cmds:
+      - terraform plan -out={{.PLAN_FILE}}
+
+  04-apply-staging:
+    desc: "Apply Terraform plan (staging)"
+    dir: "{{.STAGING_DIR}}"
+    cmds:
+      - terraform apply {{.PLAN_FILE}}
+
+  05-destroy-staging:
+    desc: Destroy Terraform infrastructure (staging)
+    dir: "{{.STAGING_DIR}}"
+    prompt: "This will DESTROY the STAGING environment. Continue?"
+    cmds:
+      - terraform destroy
+
+  06-deploy-staging:
+    desc: "Full deploy (staging): init → validate → plan → apply"
+    cmds:
+      - task: init-staging
+      - task: validate-staging
+      - task: plan-staging
+      - task: apply-staging
+
+  07-clean-plan-staging:
+    desc: "Remove plan file"
+    dir: "{{.STAGING_DIR}}"
+    cmds:
+      - rm -f {{.PLAN_FILE}}
+
+
+  # ======================
+  # PRODUCTION
+  # ======================
+  01-init-production:
+    desc: "Initialize Terraform (production)"
+    dir: "{{.PROD_DIR}}"
+    cmds:
+      - terraform init
+
+  02-validate-production:
+    desc: "Validate Terraform configuration (production)"
+    dir: "{{.PROD_DIR}}"
+    cmds:
+      - terraform validate
+
+  03-plan-production:
+    desc: "Create Terraform plan (production)"
+    dir: "{{.PROD_DIR}}"
+    cmds:
+      - terraform plan -out={{.PLAN_FILE}}
+
+  04-apply-production:
+    desc: "Apply Terraform plan (production)"
+    dir: "{{.PROD_DIR}}"
+    cmds:
+      - terraform apply {{.PLAN_FILE}}
+
+  05-destroy-production:
+    desc: "Destroy Terraform infrastructure (production)"
+    dir: "{{.PROD_DIR}}"
+    prompt: "This will DESTROY the PRODUCTION environment. Continue?"
+    cmds:
+      - terraform destroy
+
+  06-deploy-production:
+    desc: "Full deploy (production): init → validate → plan → apply"
+    cmds:
+      - task: init-production
+      - task: validate-production
+      - task: plan-production
+      - task: apply-production
+
+  07-clean-plan-production:
+    desc: "Remove plan file"
+    dir: "{{.PROD_DIR}}"
+    cmds:
+      - rm -f {{.PLAN_FILE}}

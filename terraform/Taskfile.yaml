@@ -1,0 +1,6 @@
+version: "3"
+
+includes:
+  terraform:
+    taskfile: ./envs/Taskfile.yaml
+    dir: ./envs/
