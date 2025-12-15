@@ -1,4 +1,4 @@
-name: terraform-cd
+name: cd
 
 on:
   push:
@@ -92,9 +92,9 @@ jobs:
         if: github.event_name == 'pull_request'
         working-directory: terraform/tests/terratest
         run: |
-          go test . -v timeout 10m
+          go test . -v --timeout 10m
 
-      # If worklow was triggered but release tag - set to production env
+      # If workflow was triggered but release tag - set to production env
       # If workflow was triggered by push to main - set to staging env
       # Otherwise, set to unknown
       - name: Check tag
@@ -105,7 +105,7 @@ jobs:
           else echo ::set-output name=environment::unknown
           fi
 
-      # Aply staging env for a push to main (checked by check-tag job)
+      # Apply staging env for a push to main (checked by check-tag job)
       - name: Terraform Apply Staging
         working-directory: terraform/envs/staging
         if: steps.check-tag.outputs.environment == 'staging' && github.event_name == 'push'
@@ -118,3 +118,33 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
+          
+  argocd:
+    name: ArgoCD
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check tag
+        id: check-tag
+        run: |
+          if [[ ${{ github.ref }} =~ ^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo ::set-output name=environment::production
+          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then echo ::set-output name=environment::staging
+          else echo ::set-output name=environment::unknown
+          fi
+
+      # Apply staging env manifests for a push to main
+      - name: Argocd Apply Staging
+        working-directory: cicd/argocd-gitops/
+        if: steps.check-tag.outputs.environment == 'staging' && github.event_name == 'push'
+        run: |
+          task 03-deploy-staging-cluster
+
+      # Apply production env manifests for a release tag
+      - name: Argocd Apply Production
+        working-directory: cicd/argocd-gitops/
+        if: steps.check-tag.outputs.environment == 'production' && github.event_name == 'release'
+        run: |
+          task 03-deploy-production-cluster
