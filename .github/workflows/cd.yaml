@@ -1,0 +1,33 @@
+name: terraform-cd
+
+on:
+  push:
+    branches: ["main"]
+    tags: "[0-9]*.[0-9]*.[0-9]*"
+    paths:
+      # only rebuild when app code changes
+      - "terraform/**/*"
+      # exclude these files
+      - "!terraform/backend.sh"
+      - "!terraform/delete-backend.sh"
+      - "!terraform/Taskfile.yaml"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_SA_KEY: ${{ secrets.TERRAFORM_SA_KEY }}
+    defaults:
+      run:
+        working-directory: terraform/envs/staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
