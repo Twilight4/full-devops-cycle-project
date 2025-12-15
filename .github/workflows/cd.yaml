@@ -10,6 +10,7 @@ on:
       - "!terraform/backend.sh"
       - "!terraform/delete-backend.sh"
       - "!terraform/Taskfile.yaml"
+      - "!terraform/tests/**/*"
   release:
     types: [published]
   pull_request:
