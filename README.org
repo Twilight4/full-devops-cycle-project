@@ -592,6 +592,12 @@ kubectl get nodes -o wide
 
 # Kubernetes ingress
 kubectl get ingress -A
+
+# Cluster info
+kubectl cluster-info
+
+# Ingress
+go-task gcp:10-wait-for-ingress
 #+end_src
 
 **** Compute Engine → Instances / Disks / Networks
@@ -673,6 +679,25 @@ go-task 07-clean-plan-production
 go-task gcp:09-clean-up
 #+end_src
 
+NOTE: If infrastructure destruction fails and leaves behind unwanted GCP resources (e.g. due to partial Terraform destroys, state drift, or manual intervention), those resources may continue to incur cost.
+
+As a last-resort cleanup option, you can use the [[https://github.com/ekristen/gcp-nuke][gcp-nuke]] to remove all resources from a GCP Project, use this tool when normal Terraform/gcloud cleanup has failed:
+#+begin_src shell
+# Authenticate gcp-nuke to GCP account (only supported via a Service Account either by Key or via Workload Identity)
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
+
+# Dry-run first (STRONGLY RECOMMENDED)
+gcp-nuke run \
+  --config test-config.yaml \
+  --project-id <PROJECT_NAME> 
+
+# Execute destructive cleanup
+gcp-nuke run \
+  --config test-config.yaml \
+  --project-id <PROJECT_NAME> \
+  --no-dry-run
+#+end_src
+
 
 * Roadmap (WIP)
 Docker application:
@@ -701,8 +726,8 @@ Kubernetes:
   + image overrides
 - [X] Implement Kustomize overlays
 - [ ] Implement GCP DB integration (ConfigMap, Secret, ExternalName Service)
-- [ ] Implement network policy for GCP DB database
-- [ ] Implement PersistentVolumeClaims to GCP DB
+- [ ] Implement network policy for GCP database
+- [ ] Implement PersistentVolumeClaims to GCP
 - [X] Implement helm charts packaging and templating with namespace/env separation
 - [ ] After GCP DB creation Success:
   + correct the 3 manifests (GCP -service.yaml, secret.yaml, netpo.yaml) and test
@@ -711,17 +736,17 @@ Kubernetes:
 - [X] Automated Kubernetes deployments with ArgoCD
 - [X] Git-driven versioning and rollbacks 
 
-Terraform - replicate in GCP
+Terraform:
 - [X] backend config
 - [X] IAM roles and service accounts
 - [X] VPC
-  + [X] Subnet
+- [X] Subnet
 - [X] GKE cluster
-- [X] EC2 instances
+- [X] VM instances
 - [X] Cloud Storage bucket
 - [X] Security groups + rules
 - [X] Application load balancer
-- [ ] GCP DB database
+- [ ] GCP database
 
 Grafana, Prometheus:
 - [ ] 
