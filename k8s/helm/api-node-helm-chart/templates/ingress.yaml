@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: movie-api-ingress
 spec:
-  host: {{ .Values.ingress.host }}
   ingressClassName: {{ .Values.ingress.className }}
   rules:
     - http:

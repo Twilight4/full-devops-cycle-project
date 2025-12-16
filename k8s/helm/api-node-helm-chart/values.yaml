@@ -19,8 +19,7 @@ hpa:
   cpuUtilization: 50
 
 ingress:
-  className: nginx-ingress
-  host: "movie-api.GOOGLE_DOMAIN.com"
+  className: gce
 
 config:
   COSMOSDB_DATABASE: "movie-api"
