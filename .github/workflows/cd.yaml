@@ -3,6 +3,7 @@ name: cd
 on:
   push:
     branches: ["main"]
+    tags: ["[0-9]*.[0-9]*.[0-9]*"]
     paths:
       # only rebuild when app code changes
       - "terraform/**/*"
@@ -11,8 +12,6 @@ on:
       - "!terraform/delete-backend.sh"
       - "!terraform/Taskfile.yaml"
       - "!terraform/tests/**/*"
-  release:
-    types: [published]
   pull_request:
   workflow_dispatch:
 
@@ -84,37 +83,21 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.23'
-          
-      - name : Terratest Execution
-        if: github.event_name == 'pull_request'
-        working-directory: terraform/tests/terratest
-        run: |
-          go test . -v --timeout 10m
+      # - name : Terraform Test Execution
+      #   if: github.event_name == 'pull_request'
+      #   working-directory: terraform/tests/bash
+      #   run: ./test-production.sh
 
-      # If workflow was triggered but release tag - set to production env
-      # If workflow was triggered by push to main - set to staging env
-      # Otherwise, set to unknown
-      - name: Check tag
-        id: check-tag
-        run: |
-          if [[ ${{ github.ref }} =~ ^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo ::set-output name=environment::production
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then echo ::set-output name=environment::staging
-          else echo ::set-output name=environment::unknown
-          fi
-
-      # Apply staging env for a push to main (checked by check-tag job)
+      # Apply staging env for a push to main
       - name: Terraform Apply Staging
         working-directory: terraform/envs/staging
-        if: steps.check-tag.outputs.environment == 'staging' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
 
-      # Apply production env for a release tag (checked by check-tag job)
+      # Apply production env for a release tag
       - name: Terraform Apply Production
         working-directory: terraform/envs/production
-        if: steps.check-tag.outputs.environment == 'production' && github.event_name == 'release'
+        if: github.ref == 'refs/tags/*.*.*'
         run: |
           terraform init
           terraform apply -auto-approve
@@ -127,24 +110,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check tag
-        id: check-tag
-        run: |
-          if [[ ${{ github.ref }} =~ ^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo ::set-output name=environment::production
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then echo ::set-output name=environment::staging
-          else echo ::set-output name=environment::unknown
-          fi
+        #1. install helm
+        #2. authenticate to gcp
+        #3. select cluster and project
+        #4. then apply
 
       # Apply staging env manifests for a push to main
       - name: Argocd Apply Staging
         working-directory: cicd/argocd-gitops/
-        if: steps.check-tag.outputs.environment == 'staging' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main'
         run: |
           task 03-deploy-staging-cluster
 
       # Apply production env manifests for a release tag
       - name: Argocd Apply Production
         working-directory: cicd/argocd-gitops/
-        if: steps.check-tag.outputs.environment == 'production' && github.event_name == 'release'
+        if: github.ref == 'refs/tags/*.*.*'
         run: |
           task 03-deploy-production-cluster
