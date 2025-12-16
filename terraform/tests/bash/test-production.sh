@@ -49,21 +49,43 @@ terraform plan
 log_info "Applying Terraform configuration..."
 terraform apply -auto-approve
 
-
 # ==========================================================
-# APPLY GITOPS APPLICATIONSET
+# APPLY GITOPS APPLICATION VIA ARGOCD
 # ==========================================================
+# Navigate to Helm manifests directory
+log_info "Navigating to Helm manifests directory..."
+cd ../../../k8s/helm/ || { log_error "Failed to navigate to k8s/helm"; exit 1; }
 
+# Render environment manifests for production
+log_info "Rendering production manifests..."
+if ! go-task argocd:01-render-production; then
+    log_error "Rendering production manifests failed. Exiting..."
+    exit 1
+fi
+log-kinfo "Render completed successfully."
 
+# Install / upgrade ArgoCD ApplicationSet (cluster-wide, once)
+log-info "Installing/upgrading ArgoCD ApplicationSet..."
+if ! go-task argocd:00-install-argocd-applicationset; then
+    log_error "ApplicationSet installation failed. Exiting..."
+    exit 1
+fi
+log-info "ApplicationSet applied successfully."
 
-
+# Apply production env manifest
+go-task argocd:02-install-production
+log-info "Deploying production manifests..."
+if ! go-task argocd:02-install-production; then
+    log_error "Deployment of production manifests failed. Exiting..."
+    exit 1
+fi
+log-info "Production manifests deployed successfully."
 
 # ==========================================================
 # VALIDATE THE DEPLOYED APPLICATION
 # ==========================================================
-echo "Fetching health check URL from Terraform outputs..."
+log_info "Fetching health check URL from Terraform outputs..."
 HEALTHCHECK_URL=$(terraform output -raw healthcheck_url)
-
 log_info "Health check URL: ${HEALTHCHECK_URL}"
 
 # Retry configuration for max 10 minutes (matches GCE Ingress behavior)
@@ -71,23 +93,15 @@ MAX_RETRIES=60
 SLEEP_SECONDS=10
 
 log_info "Waiting for application to become healthy..."
-
 for ((i=1; i<=MAX_RETRIES; i++)); do
   echo "Attempt ${i}/${MAX_RETRIES}..."
 
-  # Perform HTTP(S) request with certificate verification
-  if RESPONSE=$(curl -s -m 10 -w "%{http_code}" --fail --location "${HEALTHCHECK_URL}" 2>/dev/null || true); then
-    BODY="${RESPONSE::-3}"
-    STATUS="${RESPONSE: -3}"
-    
-    if [[ "${STATUS}" == "200" && "${BODY}" == "ok" ]]; then
+  STATUS=$(curl -s -o /tmp/response_body.txt -w "%{http_code}" "${HEALTHCHECK_URL}" || echo "000")
+  BODY=$(< /tmp/response_body.txt)
+
+  if [[ "${STATUS}" == "200" && "${BODY}" == "ok" ]]; then
       log_success "Application is healthy ✔"
       exit 0
-    fi
-
-    log_warn "Not ready yet (status=${STATUS}, body='${BODY}')"
-  else
-    log_warn "Request failed, retrying..."
   fi
 
   log_warn "Not ready yet (status=${STATUS}, body='${BODY}')"
