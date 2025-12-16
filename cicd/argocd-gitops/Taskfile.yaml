@@ -6,7 +6,6 @@ tasks:
     cmds:
       - kubectl apply -f namespaces/argocd.yaml
       - kubectl apply -f namespaces/staging.yaml
-      - kubectl apply -f namespaces/ingress-nginx.yaml
       - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/staging/application.yaml
 
@@ -15,7 +14,6 @@ tasks:
     cmds:
       - kubectl apply -f namespaces/argocd.yaml
       - kubectl apply -f namespaces/production.yaml
-      - kubectl apply -f namespaces/ingress-nginx.yaml
       - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/production/application.yaml
       
@@ -25,7 +23,6 @@ tasks:
       - kubectl delete -f clusters/staging/application.yaml
       - kubectl delete -f namespaces/argocd.yaml
       - kubectl delete -f namespaces/staging.yaml
-      - kubectl delete -f namespaces/ingress-nginx.yaml
 
   04-delete-production-cluster:
     desc: "Deploy argocd gitops production target"
@@ -33,7 +30,6 @@ tasks:
       - kubectl delete -f clusters/production/application.yaml
       - kubectl delete -f namespaces/argocd.yaml
       - kubectl delete -f namespaces/production.yaml
-      - kubectl delete -f namespaces/ingress-nginx.yaml
 
   02-get-webui-password:
     desc: "Get password for argocd web ui admin user"

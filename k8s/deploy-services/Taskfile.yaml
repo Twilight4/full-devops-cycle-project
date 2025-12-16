@@ -15,26 +15,26 @@ tasks:
     cmds:
       - kubectl delete -k ../overlays/staging
       - kubectl delete -f ../../cicd/argocd-gitops/namespaces/staging.yaml
-      - kubectl delete -f ../../cicd/argocd-gitops/namespaces/ingress-nginx.yaml
+      - kubectl delete namespace ingress-nginx
     desc: "Render resource yaml with staging values"
 
   03-delete-production:
     cmds:
       - kubectl delete -k ../overlays/production
       - kubectl delete -f ../../cicd/argocd-gitops/namespaces/production.yaml
-      - kubectl delete -f ../../cicd/argocd-gitops/namespaces/ingress-nginx.yaml
+      - kubectl delete namespace ingress-nginx
     desc: "Render resource yaml with production values"
 
   02-deploy-staging:
     cmds:
-      - kubectl apply -f ../../cicd/argocd-gitops/namespaces/ingress-nginx.yaml 
+      - kubectl create namespace ingress-nginx 
       - kubectl apply -f ../../cicd/argocd-gitops/namespaces/staging.yaml
       - kubectl apply -k ../overlays/staging
     desc: "Deploy staging configuration"
 
   02-deploy-production:
     cmds:
-      - kubectl apply -f ../../cicd/argocd-gitops/namespaces/ingress-nginx.yaml
+      - kubectl create namespace ingress-nginx
       - kubectl apply -f ../../cicd/argocd-gitops/namespaces/production.yaml
       - kubectl apply -k ../overlays/production
     desc: "Deploy production configuration"
