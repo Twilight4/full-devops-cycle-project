@@ -16,6 +16,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Deploy the infra with terraform
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
@@ -59,8 +60,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Initialization \`${{ steps.init.outcome }}\`
+            #### Terraform Plan \`${{ steps.plan.outcome }}\`
 
             <details><summary>Show Plan</summary>
 
@@ -101,84 +102,85 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
-          
+
+  # Apply ArgoCD GitOps to GKE with helm
   argocd:
     name: ArgoCD
     needs: terraform
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-    # Authenticate to GCP (Workload Identity preferred)
-    - name: Authenticate to GCP
-      uses: google-github-actions/auth@v3
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-    # --- Tools ---
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v4
-
-    - name: Install Helm
-      uses: azure/setup-helm@v4
-
-    - name: Install yq
-      run: |
-        sudo snap install yq
-
-    - name: Setup gcloud
-      uses: google-github-actions/setup-gcloud@v2
-
-    # --- GCP Auth ---
-    - name: Get GKE credentials
-      run: |
-        gcloud container clusters get-credentials \
-          ${{ secrets.GKE_CLUSTER_NAME }} \
-          --region ${{ secrets.GKE_REGION }} \
-          --project ${{ secrets.GCP_PROJECT_ID }}
-
-    # Sanity check for cluster access
-    - name: Verify cluster access
-      run: |
-        kubectl cluster-info
-        kubectl get ns
-
-    # ==========================================================
-    # RENDER (FAIL FAST)
-    # ==========================================================
-    # Render staging/production env manifest for application, if it fails, stop the job
-    - name: Render ArgoCD staging applications
-      working-directory: k8s/helm/
-      if: github.ref == 'refs/heads/main'
-      run: |
-        task argocd:01-render-staging
-        
-    - name: Render ArgoCD production applications
-      working-directory: k8s/helm/
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        task argocd:01-render-production
-
-    # ==========================================================
-    # APPLY (ONLY IF RENDER PASSED)
-    # ==========================================================
-    # Install / upgrade ArgoCD ApplicationSet (cluster-wide, once)
-    - name: Install ArgoCD ApplicationSet
-      working-directory: k8s/helm/
-      run: |
-        task argocd:00-install-argocd-applicationset
-
-    # Apply staging env manifests for a push to main
-    - name: Apply ArgoCD staging applications
-      working-directory: k8s/helm/
-      if: github.ref == 'refs/heads/main'
-      run: |
-        task argocd:02-install-staging
-
-    # Apply production env manifests for a release tag
-    - name: Apply ArgoCD production applications
-      working-directory: k8s/helm/
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        task argocd:02-install-production
+        - name: Checkout
+          uses: actions/checkout@v6
+  
+      # Authenticate to GCP (Workload Identity preferred)
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+  
+      # --- Tools ---
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+  
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+  
+      - name: Install yq
+        run: |
+          sudo snap install yq
+  
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+  
+      # --- GCP Auth ---
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ secrets.GKE_CLUSTER_NAME }} \
+            --region ${{ secrets.GKE_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+  
+      # Sanity check for cluster access
+      - name: Verify cluster access
+        run: |
+          kubectl cluster-info
+          kubectl get ns
+  
+      # ==========================================================
+      # RENDER (FAIL FAST)
+      # ==========================================================
+      # Render staging/production env manifest for application, if it fails, stop the job
+      - name: Render ArgoCD staging applications
+        working-directory: k8s/helm/
+        if: github.ref == 'refs/heads/main'
+        run: |
+          task argocd:01-render-staging
+          
+      - name: Render ArgoCD production applications
+        working-directory: k8s/helm/
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          task argocd:01-render-production
+  
+      # ==========================================================
+      # APPLY (ONLY IF RENDER PASSED)
+      # ==========================================================
+      # Install / upgrade ArgoCD ApplicationSet (cluster-wide, once)
+      - name: Install ArgoCD ApplicationSet
+        working-directory: k8s/helm/
+        run: |
+          task argocd:00-install-argocd-applicationset
+  
+      # Apply staging env manifests for a push to main
+      - name: Apply ArgoCD staging applications
+        working-directory: k8s/helm/
+        if: github.ref == 'refs/heads/main'
+        run: |
+          task argocd:02-install-staging
+  
+      # Apply production env manifests for a release tag
+      - name: Apply ArgoCD production applications
+        working-directory: k8s/helm/
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          task argocd:02-install-production
