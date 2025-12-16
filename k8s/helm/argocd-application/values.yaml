@@ -1,18 +1,17 @@
-configs:
-  params:
-    server.insecure: true # use false + ingress TLS in prod
+name: movie-api-argo-application
+argocdNamespace: argocd
+project: default
 
-server:
-  service:
-    type: ClusterIP
+source:
+  repoURL: https://github.com/Twilight4/movie-review-platform.git
+  targetRevision: HEAD
+  path: k8s/overlays/production
 
-controller:
-  metrics:
-    enabled: true
+destination:
+  server: https://kubernetes.default.svc
+  namespace: production
 
-repoServer:
-  metrics:
-    enabled: true
-
-applicationSet:
-  enabled: true
+syncPolicy:
+  syncOptions:
+    - CreateNamespace=True
+  automated: {}
