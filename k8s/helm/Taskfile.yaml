@@ -9,83 +9,83 @@ env:
 
 tasks:
   ### OCI registry commands
-  09-oci-search-repo:
+  oci:09-search-repo:
     cmds:
       - helm search repo bitnami/api-node --versions
     desc: "Search Bitnami repository for node-app"
-  01-oci-login-oci-registry:
+  oci:01-login-oci-registry:
     cmds:
       - cmd: gum style "Use your dockerhub username and password!"
         silent: true
       - "helm registry login registry-1.docker.io"
     desc: Login to OCI registry
-  05-oci-list-registry:
+  oci:05-list-registry:
     cmds:
       - oras repo tags registry-1.docker.io/twilight4/api-node
     desc: "List tags in the OCI registry"
-  02-oci-build:
+  oci:02-build:
     cmds:
       - helm package ./api-node-helm-chart
     desc: "Bundle helm chart as a .tgz OCI image"
-  03-oci-push:
+  oci:03-push:
     cmds:
       - helm push movie-review-0.1.0.tgz oci://registry-1.docker.io/twilight4
     desc: "Push the helm chart to an oci registry"
-  04-oci-build-push:
+  oci:04-build-push:
     cmds:
       - task: 04-build
       - task: 05-push
     desc: "Build & Push the helm chart to an oci registry"
-  06-oci-pull:
+  oci:06-pull:
     cmds:
       - helm pull oci://registry-1.docker.io/twilight4/movie-review --version=${NODE_VERSION_1}
     desc: "Pull movie-review chart from Dockerhub repository"
-  07-oci-untar:
+  oci:07-untar:
     cmds:
       - tar -xzf movie-review-${NODE_VERSION_1}.tgz
     desc: "Untar movie-review chart"
-  08-oci-show-values:
+  oci:08-show-values:
     cmds:
       - helm show values oci://registry-1.docker.io/twilight4/movie-review --version=${NODE_VERSION_1}
     desc: "Show values for movie-review chart"
   ### Local release commands
-  rollback:
+  helm:07-rollback:
     cmds:
       - helm rollback api-node-helm-chart
     desc: "Rollback api-node-helm-chart chart"
-  list:
+  helm:03-list:
     cmds:
       - helm list -n ${NAMESPACE}
     desc: "List Helm releases"
-  get-values:
+  helm:06-get-values:
     cmds:
       - helm get values api-node-helm-chart
     desc: "Get values for api-node-helm-chart release"
-  get-manifests:
+  helm:05-get-manifests:
     cmds:
       - helm get manifest api-node-helm-chart
     desc: "Get manifests for api-node-helm-chart release"
-  install-staging:
+  helm:02-install-staging:
     cmds:
       - helm upgrade --install api-node-helm-chart ./api-node-helm-chart/ --values=./api-node-helm-chart/values-staging.yaml --namespace staging --create-namespace
     desc: "Render chart yaml with staging values file"
-  install-production:
+  helm:02-install-production:
     cmds:
       - helm upgrade --install api-node-helm-chart ./api-node-helm-chart/ --values=./api-node-helm-chart/values.yaml --namespace production --create-namespace
     desc: "Install chart with production values"
-  uninstall-staging:
+  helm:04-uninstall-staging:
     cmds:
       - helm uninstall api-node-helm-chart --namespace staging
     desc: "Uninstall chart with staging values"
-  uninstall-production:
+  helm:04-uninstall-production:
     cmds:
       - helm uninstall api-node-helm-chart
     desc: "Uninstall chart with production values file"
-  render-staging:
+  helm:01-render-staging:
     cmds:
       - helm template ./api-node-helm-chart --values=./api-node-helm-chart/values-staging.yaml  | yq
     desc: "Render chart yaml with staging values file"
-  render-production:
+  helm:02-render-production:
     cmds:
       - helm template ./api-node-helm-chart --values=./api-node-helm-chart/values.yaml  | yq
     desc: "Render chart yaml with production values file"
