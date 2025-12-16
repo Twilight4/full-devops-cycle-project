@@ -16,10 +16,14 @@ tasks:
     cmds:
       - minikube addons enable ingress
     desc: "Enable Minikube ingress add-on"
-  minikube:03-delete-cluster:
+  minikube:04-delete-cluster:
     cmds:
       - minikube stop
     desc: "Delete and existing minikube Kubernetes cluster"
+  minikube:03-check-status:
+    cmds:
+      - minikube status
+    desc: "Check minikube cluster status"
   kind:01-generate-config:
     cmds:
       - REPLACE_WITH_ABSOLUTE_PATH=${PWD} envsubst < kind-config.yaml.TEMPLATE > kind-config.yaml
