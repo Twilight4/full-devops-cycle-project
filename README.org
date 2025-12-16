@@ -453,15 +453,17 @@ xh localhost:3000/health
 
 *** Test and deploy on GKE using Terraform
 **** Testing Terraform infrastructure before deployment
-This project includes a Bash-based test script to validate the Terraform configuration by deploying infrastructure to GKE and verifying it behaves as expected.
+This project includes a Bash-based test script to validate the Terraform configuration by deploying infrastructure to GKE, applying ArgoCD-managed GitOps applications, and verifying that the service behaves as expected.
 
-The CD pipeline also includes testing for production environment if a pull request was issued.
+The CD pipeline also includes testing for the production environment if a pull request is issued.
 
 ***** Prerequisites
 Before running the tests, ensure you have:
 - Terraform installed
 - Valid GCP credentials available in your environment
-- Permissions (terraform backend configured) to create and destroy GKE-related resources
+- Permissions (Terraform backend configured) to create and destroy GKE-related resources
+- go-task installed and configured to run ArgoCD tasks
+- Helm charts and manifests for the application available in the repository
 
 ***** Running the Tests
 #+begin_src shell
@@ -476,22 +478,27 @@ cd terraform/tests/bash
 The script performs the following steps:
 1. *Configures Terraform execution*
    - Changes to the specified Terraform environment
-   - Optionally checks and applies formatting (=terraform fmt=)
-   - Validates configuration (=terraform validate=)
+   - Optionally checks and applies formatting via =terraform fmt=
+   - Validates configuration using =terraform validate=
+   - Generates a Terraform plan with =terraform plan=
 
 2. *Initializes and applies Terraform*
    - Runs =terraform init= and =terraform apply=
    - Provisions all required infrastructure on GKE
 
 3. *Registers automatic cleanup*
-   - Ensures =terraform destroy= is executed at the end of the script
-   - Cleanup runs even if the test fails (via =trap=)
+   - Ensures terraform destroy is executed at the end of the script via trap
+   - Cleanup runs even if the script fails
 
-4. *Fetches Terraform outputs*
-   - Reads the health-check URL output from Terraform
+4. Applies Helm GitOps Application via ArgoCD
+   - Renders environment-specific manifests using =go-task argocd:01-render-<env>=
+   - Installs or upgrades the ArgoCD ApplicationSet (cluster-wide) via =go-task argocd:00-install-argocd-applicationset=
+   - Deploys environment-specific manifests using =go-task argocd:02-install-<env>=
+   - Ensures the application is deployed and managed via GitOps
+
+5. *Fetches Terraform outputs*
+   - Reads the =healthcheck_url= output from Terraform
    - This URL represents the exposed application endpoint (supports HTTP or HTTPS)
-
-APPLIES HELM GITOPS APPLICATIONSET
 
 5. *Validates the deployed application*
    - Sends HTTP(S) GET requests to the endpoint
@@ -506,6 +513,7 @@ APPLIES HELM GITOPS APPLICATIONSET
 ***** Test Success Criteria
 The test passes if:
 - Terraform applies successfully
+- The ArgoCD-managed application is deployed to GKE
 - The application endpoint becomes reachable
 - The HTTP response returns status =200= and body =ok=
 
@@ -614,6 +622,10 @@ go-task 01-port-forward-webui
 # The login is 'admin', to retrieve the password then login to the web UI
 go-task 02-get-webui-password
 
+
+
+
+# TODO
 # Deploy production cluster
 go-task 03-deploy-production-cluster 
 
