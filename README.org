@@ -452,37 +452,30 @@ xh localhost:3000/health
 #+end_src
 
 *** Test and deploy on GKE using Terraform
-**** Testing with [[https://github.com/gruntwork-io/terratest][Terratest]]
-This project uses *Terratest* to validate the Terraform configuration by deploying infrastructure to GKE and verifying it behaves as expected.
+**** Testing Terraform infrastructure before deployment
+This project includes a test script validate the Terraform configuration by deploying infrastructure to GKE and verifying it behaves as expected.
 
-The test runs against the example configuration located in: =terraform/tests/terratest=.
-Go module dependencies are locked in =go.sum= to ensure consistent and reproducible test runs across environments.
+The CD pipeline also includes testing for production environment if a pull request was issued.
 
 ***** Prerequisites
 Before running the tests, ensure you have:
-- Go installed (version compatible with Terratest)
 - Terraform installed
 - Valid GCP credentials available in your environment
-- Permissions to create and destroy GKE-related resources
+- Permissions (terraform backend configured) to create and destroy GKE-related resources
 
 ***** Running the Tests
 #+begin_src shell
 # Navigate to the terratest directory
-cd terraform/tests/terratest
+cd terraform/tests/bash
 
-# View task commands
-go-task --list-all
-
-# Download GO dependencies and run test
-go-task 01-download-dependencies
-go-task 02-run-test
+# Run the script
+./test-staging.sh
 #+end_src
 
-***** What the Terratest Script Does
-The =test.go= script performs the following steps:
+***** What the Test Script Does
+The script performs the following steps:
 1. *Configures Terraform execution*
-   - Points Terratest to the Terraform example located at:
-     =terraform/envs/staging/=
+   - Points to the specified Terraform environment
    - Enables default retry logic to handle transient Terraform or API errors
 
 2. *Initializes and applies Terraform*
