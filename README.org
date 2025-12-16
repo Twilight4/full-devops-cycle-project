@@ -114,11 +114,9 @@ full-devops-cycle-project/
 │  │   │   └── backend.tf
 │  │   └── Taskfile.yaml
 │  ├── tests/
-│  │   └── terratest/
-│  │       ├── test.go
-│  │       ├── Taskfile.yaml
-│  │       ├── go.sum
-│  │       └── go.mod
+│  │   └── bash/
+│  │       ├── test-staging.sh
+│  │       └── test-production.sh
 │  ├── Taskfile.yaml
 │  ├── delete-backend.sh
 │  └── backend.sh
@@ -167,22 +165,36 @@ full-devops-cycle-project/
                                   └─────────────┬──────────────────┘
                                                 │
                                                 ▼
-                                       ┌──────────────────┐
-                                       │ Build Docker Img │
-                                       └──────────────────┘
-                                                │
-                                                ▼ push
+                                       ┌────────────────────┐
+                                       │ Build Docker Image │
+                                       └────────────────────┘
+                                                │ push
+                                                ▼ 
                                       ┌──────────────────────┐
                                       │ GCR (Artifact Reg.)  │
                                       └─────────┬────────────┘
                                                 │
                                                 ▼
                                 ┌─────────────────────────────────┐
-                                │  CD Pipeline (Helm / Manifests) │
+                                │  CD Pipeline (Terraform / Helm) │
                                 └───────────────┬─────────────────┘
-                                                │ deploys
+                                                │ 
                                                 ▼
-
+                                ┌─────────────────────────────────┐
+                                │  Terraform: Deploy GKE Cluster  │
+                                └───────────────┬─────────────────┘
+                                                │
+                                                ▼
+                                ┌─────────────────────────────────┐
+                                │  Bash Test Script Validation    │
+                                └───────────────┬─────────────────┘
+                                                │ Testing
+                                                ▼
+                                ┌──────────────────────────────────────┐
+                                │ Helm/ArgoCD: Deploy Manifests in GKE │
+                                └───────────────┬──────────────────────┘
+                                                │
+                                                ▼
                       ┌──────────────────────────────────────────────────────┐
                       │                GKE Cluster w/ ArgoCD                 │
                       │                                                      │
@@ -205,7 +217,7 @@ full-devops-cycle-project/
                                                 │
                                                 ▼
                                    ┌───────────────────────────┐
-                                   │ Cloud SQL (GCP DB NoSQL)│
+                                   │ Cloud SQL (GCP DB NoSQL)  │
                                    └────────────┬──────────────┘
                                                 │
                                                 │
@@ -243,16 +255,25 @@ Terraform provisions GCP infrastructure:
 - IAM roles and service accounts
 - Cloud Storage buckets
 
+The Terraform Bash test script:
+- Uses Terraform outputs to dynamically determine application endpoints
+- Supports ApplicationSet for cluster-wide deployment orchestration
+- Performs end-to-end validation with a health-check URL to ensure applications are fully functional
+
 *** CI/CD
 - Build, test pipelines using GitHub Actions
-- Docker image building and pushing to GHCR
-- Environment-specific deployments (staging, prod)
-- Automated application deployment pipeline
+- Docker image building and pushing to GitHub Container Registry (GHCR)
+- Environment-specific deployments for staging and production
+- Automated application deployment pipeline, including:
+  + Terraform infrastructure provisioning for GKE clusters
+  + Helm chart rendering and deployment via ArgoCD =ApplicationSet=
+  + Health checks to validate service availability
+- Automated cleanup of temporary resources after test runs
 
 *** GitOps
-- Automated Kubernetes deployments with ArgoCD
-- Declarative Helm charts
-- Git-driven versioning and rollbacks
+- Automated Kubernetes deployments managed with ArgoCD
+- Declarative Helm charts for applications and environment-specific configuration
+- Git-driven versioning and rollback of deployments
 
 *** Monitoring and Logging
 - Prometheus: metrics
@@ -622,10 +643,6 @@ go-task 01-port-forward-webui
 # The login is 'admin', to retrieve the password then login to the web UI
 go-task 02-get-webui-password
 
-
-
-
-# TODO
 # Deploy production cluster
 go-task 03-deploy-production-cluster 
 
@@ -819,7 +836,7 @@ CI/CD:
 - [X] Create Pull Request with image tag changes
 - [X] Create the infrastructure using terraform
 - [X] Implement checks for terraform CD deployment (fmt/validate/plan)
-- [ ] Apply the updated manifests into cluster
+- [X] Apply the updated manifests into cluster
 
 Kubernetes:
 - [X] Create necessary manifest files (deployment, service, ingress)
