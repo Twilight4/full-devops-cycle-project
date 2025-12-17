@@ -518,7 +518,7 @@ The script performs the following steps:
    - Ensures terraform destroy is executed at the end of the script via trap
    - Cleanup runs even if the script fails
 
-4. Applies Helm GitOps Application via ArgoCD
+4. *Applies Helm GitOps Application via ArgoCD*
    - Renders environment-specific manifests using =go-task argocd:01-render-<env>=
    - Installs or upgrades the ArgoCD ApplicationSet (cluster-wide) via =go-task argocd:00-install-argocd-applicationset=
    - Deploys environment-specific manifests using =go-task argocd:02-install-<env>=
@@ -600,7 +600,7 @@ NOTE:
 In production, manifests are applied automatically via GitOps (ArgoCD).
 The following methods are provided for local testing and manual validation only.
 
-*** Using kubectl
+*** Using kubectl/kustomize
 #+begin_src shell
 # Navigate to Taskfile.yaml directory
 cd k8s/deploy-services
