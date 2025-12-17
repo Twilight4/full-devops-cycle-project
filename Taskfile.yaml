@@ -148,6 +148,26 @@ tasks:
       - gcloud compute networks delete ${CLUSTER_NAME} --quiet
     desc: "Delete the GCP network, subnet, firewall rules, and cluster in reverse sequence"
 
+  gcp:db:01-enable-api:
+    cmds:
+      - gcloud services enable firestore.googleapis.com
+    desc: "Enable the Firestore API"
+
+  gcp:db:02-create-db:
+    cmds:
+      - gcloud firestore databases create --location=${GCP_REGION} --type=firestore-native
+    desc: "Create Firestore database"
+
+  gcp:db:03-list-db:
+    cmds:
+      - gcloud firestore databases list
+    desc: "List databases"
+
+  gcp:db:04-delete-db:
+    cmds:
+      - gcloud firestore databases delete --database '(default)'
+    desc: "Delete the database"
+
   gcp:08-connect-to-cluster:
     cmds:
       - gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${GCP_ZONE}
