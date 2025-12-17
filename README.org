@@ -173,7 +173,7 @@ full-devops-cycle-project/
                                       ┌──────────────────────┐
                                       │ GCR (Artifact Reg.)  │
                                       └─────────┬────────────┘
-                                                │
+                                                │ pull request triggers CD pipeline
                                                 ▼
                                 ┌─────────────────────────────────┐
                                 │  CD Pipeline (Terraform / Helm) │
