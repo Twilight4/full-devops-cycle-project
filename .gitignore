@@ -1,3 +1,4 @@
+app/api-node/node_modules/
 k8s-cluster-local/kind-config.yaml
 helm/charts/*.tgz
 terraform/envs/staging/.terraform.lock.hcl
