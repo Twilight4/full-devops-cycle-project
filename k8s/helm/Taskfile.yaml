@@ -110,12 +110,12 @@ tasks:
     desc: "Get manifests for api-node-helm-chart release"
   chart:02-install-staging:
     cmds:
-      - kubectl create namespace ingress-nginx
+      - kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f - 
       - helm upgrade --install api-node-helm-chart ./api-node-helm-chart/ --values=./api-node-helm-chart/values-staging.yaml --namespace staging --create-namespace
     desc: "Install chart with staging values file"
   chart:02-install-production:
     cmds:
-      - kubectl create namespace ingress-nginx
+      - kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f - 
       - helm upgrade --install api-node-helm-chart ./api-node-helm-chart/ --values=./api-node-helm-chart/values.yaml --namespace production --create-namespace
     desc: "Install chart with production values"
   chart:04-uninstall-staging:
