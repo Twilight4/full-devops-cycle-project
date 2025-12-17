@@ -67,7 +67,8 @@ jobs:
           IMAGE_TAG: ${{ needs.generate-image-tag.outputs.image_tag }}    # pull in that image tag from the previous job
         working-directory: cicd/github-actions
         run: |
-          docker build -t {{.IMAGE_REPO}}/{{.IMAGE_NAME}}:{{.IMAGE_TAG}} --push ../../app/api-node IMAGE_TAG=${IMAGE_TAG}-staging
+          docker build -t ghcr.io/twilight4/api-node:${IMAGE_TAG}-staging ../../app/api-node
+          docker push ghcr.io/twilight4/api-node:${IMAGE_TAG}-staging
         # run: |
         #   # Build and push images for staging tag for push to main or release a new tag
         #   task build-push-container-image-multi-arch IMAGE_TAG=${IMAGE_TAG}-staging
