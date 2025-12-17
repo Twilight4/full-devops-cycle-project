@@ -538,6 +538,8 @@ xh localhost:3000/health
 # Expected output: {"status":"ok"}
 #+end_src
 
+**** [[#Verify-the-firestore-database-is-working-as-expected][Verify the firestore database is working as expected]]
+
 *** Test and deploy infrastructure using Terraform
 **** Testing Terraform infrastructure before deployment
 This project includes a Bash-based test script to validate the Terraform configuration by deploying infrastructure to GKE, applying ArgoCD-managed GitOps applications, and verifying that the service behaves as expected.
@@ -764,6 +766,12 @@ Service Accounts/IAM Policies/Roles:
 - Navigate to IAM & Admin → Service Accounts
 - Navigate to IAM & Admin → IAM
 
+**** Firestore database
+Database Resources:
+- Navigate to Firestore → Data
+- Navigate to Firestore → Indexes
+- Navigate to Firestore → Rules
+
 **** APIs & Services
 Enabled APIs:
 - Navigate to APIs & Services → Dashboard
@@ -839,6 +847,9 @@ gcloud compute firewall-rules list
 
 # List routes
 gcloud compute routes list
+
+# List firestore databases
+gcloud firestore databases list
 #+end_src
 
 **** Service Accounts
