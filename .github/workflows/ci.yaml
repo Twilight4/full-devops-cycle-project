@@ -67,13 +67,15 @@ jobs:
           IMAGE_TAG: ${{ needs.generate-image-tag.outputs.image_tag }}    # pull in that image tag from the previous job
         working-directory: cicd/github-actions
         run: |
-          # Build and push images for staging tag for push to main or release a new tag
-          task build-push-container-image-multi-arch IMAGE_TAG=${IMAGE_TAG}-staging
+          docker build -t {{.IMAGE_REPO}}/{{.IMAGE_NAME}}:{{.IMAGE_TAG}} --push ../../app/api-node
+        # run: |
+        #   # Build and push images for staging tag for push to main or release a new tag
+        #   task build-push-container-image-multi-arch IMAGE_TAG=${IMAGE_TAG}-staging
 
-          # Build and push images for production tag only when new release tag is pushed
-          if [[ $GITHUB_REF == refs/tags/*.*.* ]]; then
-            task build-push-container-image-multi-arch NEW_TAG=${IMAGE_TAG}
-          fi
+        #   # Build and push images for production tag only when new release tag is pushed
+        #   if [[ $GITHUB_REF == refs/tags/*.*.* ]]; then
+        #     task build-push-container-image-multi-arch NEW_TAG=${IMAGE_TAG}
+        #   fi
 
   update-tags:
     runs-on: ubuntu-latest
