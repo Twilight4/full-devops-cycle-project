@@ -13,24 +13,25 @@ module "gke" {
 }
 
 module "firestore" {
-  source = "../../modules/firestore/"
-
+  source     = "../../modules/firestore/"
   project_id = "movie-review-platform8451"
-  region     = var.region
 
-  database_name           = "firestore"
+  database_name = "firestore"
+  region        = var.region
+
   type                    = "FIRESTORE_NATIVE"
   deletion_policy         = "DELETE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
 }
 
 module "iam" {
-  source = "../../modules/iam/"
+  source     = "../../modules/iam/"
+  project_id = "movie-review-platform8451"
 }
 
 module "workloads" {
-  source = "../../modules/workloads/"
+  source     = "../../modules/workloads/"
+  project_id = "movie-review-platform8451"
 
-  project_id               = "movie-review-platform8451"
   gcp_service_account_name = module.iam.service_account_name
 }
