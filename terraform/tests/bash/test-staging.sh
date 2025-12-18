@@ -84,8 +84,17 @@ log-info "Staging manifests deployed successfully."
 # ==========================================================
 # VALIDATE THE DEPLOYED APPLICATION
 # ==========================================================
-log_info "Fetching health check URL from Terraform outputs..."
-HEALTHCHECK_URL=$(terraform output -raw healthcheck_url)
+log_info "Fetching GCP Ingress external IP..."
+
+# Fetch the external IP of the ingress
+INGRESS_IP=$(kubectl get ingress my-ingress -n staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+if [[ -z "${INGRESS_IP}" ]]; then
+    log_error "Failed to fetch Ingress external IP"
+    exit 1
+fi
+
+# Construct health check URL
+HEALTHCHECK_URL="http://${INGRESS_IP}/health"
 log_info "Health check URL: ${HEALTHCHECK_URL}"
 
 # Retry configuration for max 10 minutes (matches GCE Ingress behavior)
