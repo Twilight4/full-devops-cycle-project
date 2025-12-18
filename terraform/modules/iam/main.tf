@@ -4,7 +4,8 @@ resource "google_service_account" "movie_api" {
 }
 
 resource "google_project_iam_member" "firestore_access" {
-  role   = "roles/datastore.user"
-  member = "serviceAccount:${google_service_account.movie_api.email}"
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.movie_api.email}"
 }
 
