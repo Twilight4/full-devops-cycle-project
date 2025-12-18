@@ -21,7 +21,7 @@ tasks:
     desc: Login to OCI registry
   oci:05-list-registry:
     cmds:
-      - oras repo tags registry-1.docker.io/twilight4/api-node
+      - oras repo tags registry-1.docker.io/twilight4/api-node-helm-chart
     desc: "List tags in the OCI registry"
   oci:02-build:
     cmds:
@@ -29,12 +29,12 @@ tasks:
     desc: "Bundle helm chart as a .tgz OCI image"
   oci:03-push:
     cmds:
-      - helm push movie-review-0.1.0.tgz oci://registry-1.docker.io/twilight4
+      - helm push api-node-helm-chart-0.1.0.tgz oci://registry-1.docker.io/twilight4
     desc: "Push the helm chart to an oci registry"
   oci:04-build-push:
     cmds:
-      - task: 04-build
-      - task: 05-push
+      - task: oci:02-build
+      - task: oci:03-push
     desc: "Build & Push the helm chart to an oci registry"
   oci:06-pull:
     cmds:
@@ -46,7 +46,7 @@ tasks:
     desc: "Untar movie-review chart"
   oci:08-show-values:
     cmds:
-      - helm show values oci://registry-1.docker.io/twilight4/movie-review --version=${NODE_VERSION_1}
+      - helm show values oci://registry-1.docker.io/twilight4/api-node-helm-chart --version=${NODE_VERSION_1}
     desc: "Show values for movie-review chart"
   argocd:02-install-staging:
     cmds:
