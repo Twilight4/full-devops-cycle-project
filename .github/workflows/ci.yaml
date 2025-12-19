@@ -35,16 +35,6 @@ jobs:
           image_tag=$(task generate-version-tag)
           echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
 
-      - name: Generate Image Tag for production
-        if: startsWith(github.ref, 'refs/tags/')
-        id: generate-image-tag-prod
-        working-directory: cicd/github-actions
-        run: |
-          TAG=$(git describe --tags --first-parent --match "[0-9]*.[0-9]*.[0-9]*" --abbrev=0)
-          echo "image_tag_prod=$TAG" >> $GITHUB_OUTPUT
-          #image_tag_prod=$(task generate-version-tag-prod)
-          #echo "image_tag_prod=$image_tag_prod" >> $GITHUB_OUTPUT
-
   build-tag-push:
     runs-on: ubuntu-latest
     needs: generate-image-tag
@@ -80,16 +70,15 @@ jobs:
 
       - name: Build and push production image
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          IMAGE_TAG_PROD: ${{ steps.generate-image-tag-prod.outputs.image_tag_prod }}
         working-directory: cicd/github-actions
         run: |
-          echo "IMAGE_TAG_PROD value: ${IMAGE_TAG_PROD}"
-          if [ -z "${IMAGE_TAG_PROD}" ]; then
-            echo "ERROR: IMAGE_TAG_PROD is empty"
+          IMAGE_TAG=$(git describe --tags --first-parent --match "[0-9]*.[0-9]*.[0-9]*" --abbrev=0)
+          echo "IMAGE_TAG=$IMAGE_TAG"
+          if [ -z "${IMAGE_TAG}" ]; then
+            echo "ERROR: IMAGE_TAG is empty"
             exit 1
           fi
-          task build-push-container-image-multi-arch IMAGE_TAG=${IMAGE_TAG_PROD}
+          task build-push-container-image-multi-arch IMAGE_TAG=${IMAGE_TAG}
 
   update-tags:
     runs-on: ubuntu-latest
