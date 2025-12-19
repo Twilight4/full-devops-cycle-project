@@ -81,7 +81,7 @@ jobs:
       - name: Build and push production image
         if: startsWith(github.ref, 'refs/tags/')
         env:
-          IMAGE_TAG_PROD: ${{ needs.generate-image-tag-prod.outputs.image_tag_prod }}
+          IMAGE_TAG_PROD: ${{ steps.generate-image-tag-prod.outputs.image_tag_prod }}
         working-directory: cicd/github-actions
         run: |
           echo "IMAGE_TAG_PROD value: ${IMAGE_TAG_PROD}"
