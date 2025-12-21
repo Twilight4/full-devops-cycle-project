@@ -812,7 +812,10 @@ gcloud container node-pools describe <NODE_POOL_NAME> --cluster <CLUSTER_NAME> -
 # Kubernetes nodes
 kubectl get nodes -o wide
 
-# Kubernetes ingress
+# Check if GCE Ingress controller is enabled - if you don't see output, it means it's disabled
+kubectl get pods -n kube-system | grep ingress
+
+# Check kubernetes ingress external IP
 kubectl get ingress -A
 
 # Cluster info
@@ -896,7 +899,6 @@ xh get http://<CLUSTER_IP>/health
 #+end_src
 
 **** Verify the firestore database is working as expected
-
 #+begin_src shell
 # One-liner smoke test - If this returns a number → Firestore + K8s + API are all working
 curl -s http://<CLUSTER_IP>:<PORT>/movies | jq 'length'
