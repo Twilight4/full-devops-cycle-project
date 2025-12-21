@@ -18,6 +18,13 @@ resource "google_container_cluster" "primary" {
   # Let terraform destroy the cluster
   deletion_protection = false
 
+  # Enable the GCE ingress controller add-on
+  addons_config {
+    http_load_balancing {
+      disabled = false
+    }
+  }
+
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
