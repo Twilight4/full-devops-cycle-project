@@ -18,6 +18,10 @@ resource "google_container_cluster" "primary" {
   # Let terraform destroy the cluster
   deletion_protection = false
 
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
   # allocate Pod + Service IP ranges automatically (Autopilot-style IP) via VPC-native routing
   ip_allocation_policy {}
 }
