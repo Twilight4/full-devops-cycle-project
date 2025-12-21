@@ -54,7 +54,7 @@ tasks:
         helm upgrade --install argocd-application \
         ./argocd-application/ \
         --namespace staging \
-        --values values-staging.yaml \
+        --values ./argocd-application/values-staging.yaml \
         --create-namespace
     desc: "Install argocd-application chart with staging values file"
   argocd:02-install-production:
@@ -63,7 +63,7 @@ tasks:
         helm upgrade --install argocd-application \
         ./argocd-application/ \
         --namespace production \
-        --values values.yaml \
+        --values ./argocd-application/values.yaml \
         --create-namespace
     desc: "Install argocd-application chart with production values file"
   argocd:01-render-staging:
