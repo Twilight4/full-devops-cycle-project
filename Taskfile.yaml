@@ -170,6 +170,6 @@ tasks:
 
   gcp:08-connect-to-cluster:
     cmds:
-      - gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${GCP_ZONE}
+      - gcloud container clusters get-credentials ${CLUSTER_NAME} --region ${GCP_REGION}
     desc: "Connect to the GKE cluster"
 
