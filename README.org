@@ -61,17 +61,35 @@ full-devops-cycle-project/
 │   │       │   ├── patches/
 │   │       │   └── kustomization.yaml
 │   │       └── kustomization.yaml
-│   ├── helm/
-│   │   ├── api-node-helm-chart/
-│   │   │   ├── templates/
-│   │   │   ├── values.yaml
-│   │   │   ├── values-staging.yaml
-│   │   │   └── Chart.yaml
-│   │   ├── argocd-application/       → ArgoCD installation with helm for CD pipeline
-│   │   │   ├── templates/
-│   │   │   ├── values.yaml
-│   │   │   ├── values-staging.yaml
-│   │   │   └── Chart.yaml
+│   ├── helm/           → Node + monitoring templates
+│   │   ├── monitoring/
+│   │   │   ├── kube-prometheus-stack/
+│   │   │   │   ├── templates/
+│   │   │   │   ├── values.yaml
+│   │   │   │   └── Chart.yaml
+│   │   │   └── Taskfile.yaml
+│   │   ├── apps/
+│   │   │   └── api-node/
+│   │   │       ├── argocd-application/
+│   │   │       │   ├── templates
+│   │   │       │   │   └── application.yaml
+│   │   │       │   ├── values.yaml
+│   │   │       │   ├── values-staging.yaml
+│   │   │       │   └── Chart.yaml
+│   │   │       ├── api-node-helm-chart/
+│   │   │       │   ├── templates/
+│   │   │       │   │   ├── serviceaccount.yaml
+│   │   │       │   │   ├── netpol.yaml
+│   │   │       │   │   ├── movie-api-service.yaml
+│   │   │       │   │   ├── movie-api-hpa.yaml
+│   │   │       │   │   ├── movie-api-deployment.yaml
+│   │   │       │   │   ├── ingress.yaml
+│   │   │       │   │   ├── configmap.yaml
+│   │   │       │   │   └── argocd-namespace.yaml
+│   │   │       │   ├── values.yaml
+│   │   │       │   ├── values-staging.yaml
+│   │   │       │   └── Chart.yaml
+│   │   │       └── Taskfile.yaml
 │   │   └── Taskfile.yaml
 │   ├── deploy-services/
 │   │   ├── api-node/
@@ -142,10 +160,6 @@ full-devops-cycle-project/
 │   │   │       └── application.yaml
 │   │   └── Taskfile.yaml
 │   └── Taskfile.yaml
-│
-├── monitoring/         → Node + monitoring configuration
-│   ├── grafana-dashboards/
-│   └── prometheus/
 │
 ├── .github/            → CI/CD pipelines
 │   └── workflows/
