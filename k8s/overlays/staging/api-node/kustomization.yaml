@@ -5,7 +5,7 @@ namePrefix: staging-
 namespace: staging
 
 resources:
-  - ../../../deploy-services/api-node/manifests/
+  - ../../base/api-node/manifests/
 
 patches:
   - path: ./patches/Deployment.yaml

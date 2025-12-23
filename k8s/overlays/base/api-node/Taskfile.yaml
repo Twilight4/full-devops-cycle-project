@@ -3,38 +3,38 @@ version: "3"
 tasks:
   01-render-staging:
     cmds:
-      - kubectl kustomize ../overlays/staging | yq
+      - kubectl kustomize ../staging | yq
     desc: "Render resource yaml with staging values"
 
   01-render-production:
     cmds:
-      - kubectl kustomize ../overlays/production | yq
+      - kubectl kustomize ../production | yq
     desc: "Render resource yaml with production values"
 
   03-delete-staging:
     cmds:
-      - kubectl delete -k ../overlays/staging
-      - kubectl delete -f ../../cicd/argocd-gitops/namespaces/staging.yaml
+      - kubectl delete -k ../staging
+      - kubectl delete -f ../../../namespaces/staging.yaml
       - kubectl delete namespace ingress-nginx
     desc: "Render resource yaml with staging values"
 
   03-delete-production:
     cmds:
-      - kubectl delete -k ../overlays/production
-      - kubectl delete -f ../../cicd/argocd-gitops/namespaces/production.yaml
+      - kubectl delete -k ../production
+      - kubectl delete -f ../../../namespaces/production.yaml
       - kubectl delete namespace ingress-nginx
     desc: "Render resource yaml with production values"
 
   02-deploy-staging:
     cmds:
       - kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f - 
-      - kubectl apply -f ../../cicd/argocd-gitops/namespaces/staging.yaml
-      - kubectl apply -k ../overlays/staging
+      - kubectl apply -f ../../../namespaces/staging.yaml
+      - kubectl apply -k ../staging
     desc: "Deploy staging configuration"
 
   02-deploy-production:
     cmds:
       - kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f - 
-      - kubectl apply -f ../../cicd/argocd-gitops/namespaces/production.yaml
-      - kubectl apply -k ../overlays/production
+      - kubectl apply -f ../../../namespaces/production.yaml
+      - kubectl apply -k ../production
     desc: "Deploy production configuration"
