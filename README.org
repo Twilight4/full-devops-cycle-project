@@ -745,7 +745,7 @@ go-task 03-list
 go-task 04-uninstall-production
 #+end_src
 
-*** Using GitOps Setup (ArgoCD)
+*** GitOps Setup (ArgoCD)
 #+begin_src shell
 # Navigate to gitops directory
 cd cicd/
@@ -766,7 +766,7 @@ go-task webui:02-get-webui-password
 go-task api-node:04-delete-production-cluster
 #+end_src
 
-*** Monitoring Setup
+*** Monitoring Setup (Grafana & Prometheus)
 #+begin_src shell
 # Navigate to gitops directory
 cd k8s/helm
@@ -857,6 +857,9 @@ gcloud container node-pools describe <NODE_POOL_NAME> --cluster <CLUSTER_NAME> -
 
 # Kubernetes nodes
 kubectl get nodes -o wide
+
+# Check PVCs for prometheus / grafana / alertmanager
+kubectl get pvc -n monitoring
 
 # Check if GCE Ingress controller is enabled - if you don't see output, it means it's disabled
 kubectl get pods -n kube-system | grep ingress
