@@ -870,7 +870,7 @@ gcloud container clusters describe <CLUSTER_NAME> \
   --format="value(addonsConfig.httpLoadBalancing.disabled)"
 
 # Check kubernetes ingress external IP
-kubectl get ingress -A
+kubectl get ingress -n <env_namespace>
 
 # Cluster info
 kubectl cluster-info
