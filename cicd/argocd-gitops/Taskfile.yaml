@@ -1,9 +1,0 @@
-version: "3"
-
-includes:
-  api-node:
-    taskfile: ./apps/api-node/Taskfile.yaml
-    dir: ./apps/api-node
-  monitoring:
-    taskfile: ./apps/monitoring/Taskfile.yaml
-    dir: ./apps/monitoring
