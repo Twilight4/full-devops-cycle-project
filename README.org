@@ -787,9 +787,9 @@ go-task monitoring:chart:02-install-monitoring
 go-task monitoring:argocd:03-uninstall-application
 go-task monitoring:chart:04-uninstall-monitoring
 
-# Accessing Prometheus and Graphana WebUI
+# Accessing Prometheus and Grafana WebUI
 cd cicd/
-go-task webui:03-port-forward-graphana
+go-task webui:03-port-forward-grafana
 go-task webui:04-port-forward-prometheus
 #+end_src
 
@@ -1055,4 +1055,8 @@ Terraform:
 - [X] GCP Firestore database
 
 Grafana, Prometheus:
-- [ ] 
+- [X] Grafana deployment
+- [X] Prometheus data source
+- [X] Persistent storage for dashboards
+- [ ] Node Exporter
+- [ ] Alertmanager deployment
