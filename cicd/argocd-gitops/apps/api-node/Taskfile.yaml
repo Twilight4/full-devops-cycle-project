@@ -4,16 +4,16 @@ tasks:
   03-deploy-staging-cluster:
     desc: "Deploy argocd gitops staging target"
     cmds:
-      - kubectl apply -f namespaces/argocd.yaml
-      - kubectl apply -f namespaces/staging.yaml
+      - kubectl apply -f ../../../../k8s/namespaces/argocd.yaml
+      - kubectl apply -f ../../../../k8s/namespaces/staging.yaml
       - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/staging/application.yaml
 
   03-deploy-production-cluster:
     desc: "Deploy argocd gitops production target"
     cmds:
-      - kubectl apply -f namespaces/argocd.yaml
-      - kubectl apply -f namespaces/production.yaml
+      - kubectl apply -f ../../../../k8s/namespaces/argocd.yaml
+      - kubectl apply -f ../../../../k8s/namespaces/production.yaml
       - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
       - kubectl apply -f clusters/production/application.yaml
       
@@ -21,12 +21,12 @@ tasks:
     desc: "Deploy argocd gitops staging target"
     cmds:
       - kubectl delete -f clusters/staging/application.yaml
-      - kubectl delete -f namespaces/argocd.yaml
-      - kubectl delete -f namespaces/staging.yaml
+      - kubectl delete -f ../../../../k8s/namespaces/argocd.yaml
+      - kubectl delete -f ../../../../k8s/namespaces/staging.yaml
 
   04-delete-production-cluster:
     desc: "Deploy argocd gitops production target"
     cmds:
       - kubectl delete -f clusters/production/application.yaml
-      - kubectl delete -f namespaces/argocd.yaml
-      - kubectl delete -f namespaces/production.yaml
+      - kubectl delete -f ../../../../k8s/namespaces/argocd.yaml
+      - kubectl delete -f ../../../../k8s/namespaces/production.yaml
