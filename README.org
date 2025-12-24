@@ -769,7 +769,7 @@ go-task api-node:delete-production-cluster
 *** Monitoring Setup (Grafana & Prometheus)
 #+begin_src shell
 # Navigate to gitops directory
-cd k8s/helm
+cd k8s/
 
 # View task commands from root directory
 go-task --list-all

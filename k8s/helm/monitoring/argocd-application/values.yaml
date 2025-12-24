@@ -1,5 +1,5 @@
 name: movie-api-argo-application
-argocdNamespace: argocd
+argocdNamespace: monitoring
 project: default
 
 source:
