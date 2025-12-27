@@ -14,10 +14,10 @@ tasks:
   port-forward-grafana:
     desc: "Port forward web UI to localhost on port 3000"
     cmds:
-      - kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+      - kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
 
   port-forward-prometheus:
     desc: "Port forward web UI to localhost on port 9090"
     cmds:
-      - kubectl port-forward svc/monitoring-kube-prometheus-prometheus -n monitoring 9090
+      - kubectl port-forward svc/kube-prometheus-stack-prometheus -n monitoring 9090:9090
 
