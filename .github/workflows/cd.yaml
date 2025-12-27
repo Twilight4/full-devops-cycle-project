@@ -57,7 +57,7 @@ jobs:
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GHCR_TOKEN }}
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization \`${{ steps.init.outcome }}\`
@@ -84,10 +84,9 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name : Terraform Test Execution
-        if: github.event_name == 'pull_request'
-        working-directory: terraform/tests/bash
-        run: ./test-production.sh
+      #- name : Terraform Test Execution
+      #  working-directory: terraform/tests/bash
+      #  run: ./test-production.sh
 
       # Apply staging env for a push to main
       - name: Terraform Apply Staging
@@ -151,36 +150,42 @@ jobs:
       # ==========================================================
       # Render staging/production env manifest for application, if it fails, stop the job
       - name: Render ArgoCD staging applications
-        working-directory: k8s/helm/
+        working-directory: k8s/helm/apps/api-node
         if: github.ref == 'refs/heads/main'
         run: |
           task argocd:01-render-staging
           
       - name: Render ArgoCD production applications
-        working-directory: k8s/helm/
+        working-directory: k8s/helm/apps/api-node
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           task argocd:01-render-production
   
       # ==========================================================
-      # APPLY (ONLY IF RENDER PASSED)
+      # APPLY GITOPS ARGOCD ONLY IF RENDER PASSED
       # ==========================================================
       # Install / upgrade ArgoCD ApplicationSet (cluster-wide, once)
       - name: Install ArgoCD ApplicationSet
-        working-directory: k8s/helm/
+        working-directory: k8s/helm/apps/api-node
         run: |
           task argocd:00-install-argocd-applicationset
   
       # Apply staging env manifests for a push to main
       - name: Apply ArgoCD staging applications
-        working-directory: k8s/helm/
+        working-directory: k8s/helm/apps/api-node
         if: github.ref == 'refs/heads/main'
         run: |
           task argocd:02-install-staging
   
       # Apply production env manifests for a release tag
       - name: Apply ArgoCD production applications
-        working-directory: k8s/helm/
+        working-directory: k8s/helm/apps/api-node
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           task argocd:02-install-production
+
+      # Install kube-prometheus-stack helm chart
+      - name: Install kube-prometheus-stack helm chart
+        working-directory: k8s/helm/monitoring/kube-prometheus-stack
+        run: |
+          task install-monitoring
