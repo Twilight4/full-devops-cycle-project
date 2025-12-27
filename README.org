@@ -443,7 +443,7 @@ gcloud auth activate-service-account --key-file=<KEY_FILE>
 gcloud auth list
 #+end_src
 
-Then update backend.tf's =bucket= argument to point to the =<BUCKET_NAME>=.
+Then update backend.tf's =bucket= value to point to the specified bucket name.
 
 ** 3. Manual infrastructure deployment (CD-managed in production)
 WARNING:
@@ -767,6 +767,8 @@ go-task api-node:delete-production-cluster
 #+end_src
 
 *** Monitoring Setup (Grafana & Prometheus)
+If you're testing locally in minikube/kind, you need to replace the =values.yaml= with =values-local-testing.yaml= in =k8s/helm/monitoring/kube-prometheus-stack/= because the PVCs in =values.yaml= are bound to GKE-specific volumes.
+
 #+begin_src shell
 # Navigate to gitops directory
 cd k8s/
@@ -774,18 +776,11 @@ cd k8s/
 # View task commands from root directory
 go-task --list-all
 
-# Install ArgoCD application to monitor prometheus
-# if you didn't use tasks that deplyoed ArgoCD with kubectl (like api-node:03-deploy-production-cluster), install argocd with helm
-#go-task monitoring:argocd:00-install-argocd-applicationset
-go-task monitoring:argocd:01-render-application
-go-task monitoring:argocd:02-install-application
-
 # Install prometheus
-go-task monitoring:chart:01-install-monitoring
+go-task monitoring:install-monitoring
 
-# Uninstall ArgoCD and prometheus
-go-task monitoring:argocd:03-uninstall-application
-go-task monitoring:chart:02-uninstall-monitoring
+# Uninstall prometheus
+go-task monitoring:uninstall-monitoring
 
 # Accessing Prometheus and Grafana WebUI
 cd cicd/
