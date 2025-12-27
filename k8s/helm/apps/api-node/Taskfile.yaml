@@ -51,7 +51,6 @@ tasks:
         helm repo update
         helm upgrade --install argocd argo/argo-cd \
         --namespace argocd \
-        --version 7.7.11 \
         --create-namespace
     desc: "Add ArgoCD repository and install ArgoCD"
   chart:07-rollback:
