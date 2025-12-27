@@ -186,6 +186,6 @@ jobs:
 
       # Install kube-prometheus-stack helm chart
       - name: Install kube-prometheus-stack helm chart
-        working-directory: k8s/helm/monitoring/kube-prometheus-stack
+        working-directory: k8s/helm/monitoring/
         run: |
           task install-monitoring
